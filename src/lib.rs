@@ -13,12 +13,31 @@ use core::f64;
 pub const RMESURE_EPS: f64 = f64::EPSILON;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0; //f32::MAX.sqrt()/2.0;
 
+//#[derive(Eq)]
 #[derive(Debug)]
 pub struct RMesure
 {
 	valeur: f64,
 	epsilon: f64,
     alpha: f64,
+}
+
+// impl Copy for RMesure {}
+
+impl Clone for RMesure 
+{
+    fn clone(&self) -> Self
+	{
+		Self { valeur: self.valeur, epsilon: self.epsilon, alpha: self.alpha }
+    }
+}
+
+impl Drop for RMesure
+{
+    fn drop(&mut self)
+	{
+        //println!("Toto est détruit")
+    }
 }
 
 impl RMesure 
@@ -53,6 +72,7 @@ impl RMesure
 
 		let mut inner_epsilon: f64 = 0.0;
 
+		/*
 		match loi
 		{
 			'R' => inner_epsilon = f64::abs(it) / f64::sqrt(12.0),
@@ -62,6 +82,18 @@ impl RMesure
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
 			'N' => inner_epsilon = f64::abs(it) / 2.0, 
 			_ => inner_epsilon = f64::abs(it) / 2.0, 
+		}
+		*/
+
+		match loi
+		{
+			'R' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'S' => inner_epsilon = it.abs() / 1.4_f64,
+			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
+			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
+			'N' => inner_epsilon = it.abs() / 2.0_f64, 
+			_ => inner_epsilon = it.abs() / 2.0_f64, 
 		}
 		
 		Self { valeur, epsilon: inner_epsilon, alpha: 95.45 }
