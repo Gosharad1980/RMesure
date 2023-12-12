@@ -1,14 +1,13 @@
 // Entering ta_gueule_le_compilo
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![allow(unused_variables)]
-#![allow(dead_code)]
+//#![allow(unused_variables)]
+//#![allow(dead_code)]
 #![allow(unused_assignments)]
 // Ending ta_gueule_le_compilo
-//use core::f64::{EPSILON, MAX};
-//use core::f32::{EPSILON, MAX};
 
 use core::f64;
+use std::ops;
 
 pub const RMESURE_EPS: f64 = f64::EPSILON;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0; //f32::MAX.sqrt()/2.0;
@@ -32,13 +31,7 @@ impl Clone for RMesure
     }
 }
 
-impl Drop for RMesure
-{
-    fn drop(&mut self)
-	{
-        //println!("Toto est détruit")
-    }
-}
+impl Drop for RMesure { fn drop(&mut self) { } }
 
 impl RMesure 
 {
@@ -57,7 +50,6 @@ impl RMesure
 		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
 
-
 	pub fn loi(valeur: f64, it: f64, loi: char) -> Self 
 	{
 		// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
@@ -70,20 +62,8 @@ impl RMesure
 		//		4) 'N' : loi Normale par défaut, K = 2              : epsilon = it / 2.0
 		//		5) 'C' : appareil de Classe +/- it                  : epsilon = it / rac(3.0)
 
-		let mut inner_epsilon: f64 = 0.0;
-
-		/*
-		match loi
-		{
-			'R' => inner_epsilon = f64::abs(it) / f64::sqrt(12.0),
-			'H' => inner_epsilon = f64::abs(it) / f64::sqrt(12.0),
-			'S' => inner_epsilon = f64::abs(it) / 1.4,
-			'C' => inner_epsilon = f64::abs(it) / f64::sqrt(3.0),
-			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
-			'N' => inner_epsilon = f64::abs(it) / 2.0, 
-			_ => inner_epsilon = f64::abs(it) / 2.0, 
-		}
-		*/
+		//let mut inner_epsilon: f64 = 0.0;
+		let inner_epsilon: f64;
 
 		match loi
 		{
@@ -138,4 +118,48 @@ impl RMesure
 
 	}
 
+}
+
+/************************************/
+/* Allez on entre dans le sur !!!!! */
+/************************************/
+
+// RMesure = RMesure + RMesure
+impl ops::Add<&RMesure> for RMesure 
+{
+    type Output = RMesure;
+
+    fn add(self, M: &RMesure) -> RMesure
+	{
+		// U²(self + M) = U²(self) + U²(M)
+		let valeur_res: f64  = self.valeur + M.valeur;
+		let epsilon_res: f64 = (self.epsilon.powf(2.0_f64) + M.epsilon.powf(2.0_f64)).sqrt();
+		let alpha_res: f64   = f64::max(self.alpha, M.alpha);
+
+        return RMesure::new(valeur_res, epsilon_res, alpha_res)
+    }
+}
+
+// RMesure = constante_f64 + RMesure
+// f64.add(RMesure)
+impl ops::Add<&RMesure> for f64 
+{
+    type Output = RMesure;
+
+    fn add(self, M: &RMesure) -> RMesure 
+	{
+        RMesure::scalaire(self) + M 
+    }
+}
+
+// RMesure = RMesure + constante_f64
+// RMesure.add(f64)
+impl ops::Add<&f64> for RMesure 
+{
+    type Output = RMesure;
+
+    fn add(self, M: &f64) -> RMesure 
+	{
+        self + RMesure::scalaire(M)
+    }
 }
