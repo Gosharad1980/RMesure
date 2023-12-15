@@ -10,6 +10,8 @@
 use core::f64;
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
+//use sscanf::sscanf;
+
 
 
 pub const RMESURE_EPS: f64 = f64::EPSILON;
@@ -69,6 +71,24 @@ impl RMesure
 		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
 
+	/*
+	pub fn load(msg: &str) -> Self
+	{
+		let valeur_loc: f64;
+		let epsilon_loc: f64;
+		let alpha_loc: f64;
+
+		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
+
+		Self 
+		{
+			valeur: valeur_loc, 
+			epsilon: epsilon_loc.abs() / RMesure::K_alpha(alpha_loc), //fabs(it/this->K())
+			alpha: alpha_loc 
+		}
+	}
+	*/
+
 	/// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
 	/// il est possible d'estimer l'incertitude type directement à partir de
 	/// l'intervalle de tolérance à l'aide des lois suivante
@@ -95,37 +115,9 @@ impl RMesure
 		
 		Self { valeur, epsilon: inner_epsilon, alpha: 95.45 }
 
-    }	
-	
-}
+    }
 
-impl RMesure
-{	
-	pub fn Val(&self) -> f64	{ self.valeur 	}	// LA mesure en cours de traitement
-	pub fn Alpha(&self) -> f64	{ self.alpha 	}	// Taux de confiance
-	pub fn Eps(&self) -> f64 	{ self.epsilon	}	// Incertitude type.
-	pub fn IT(&self) -> f64 	{ self.epsilon * self.K() }	// Intervalle de tolérance = Eps x K
-
-	/// Retourne : (min , 1er quartile , médiane , 3e quartile , max)
-	/// https://fr.wikipedia.org/wiki/Loi_normale#Loi_normale_centr%C3%A9e_r%C3%A9duite
-	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
-	{ 
-		(
-			self.valeur - (self.epsilon * self.K_alpha(99.3)),
-			self.valeur - (self.epsilon * self.K_alpha(50.0)),
-			self.valeur,
-			self.valeur + (self.epsilon * self.K_alpha(50.0)),
-			self.valeur + (self.epsilon * self.K_alpha(99.3)),
-		)
-	}	
-
-	// Coeff d'élargissement
-	fn K(&self) -> f64 
-	{
-		self.K_alpha(self.alpha)
-	}
-
-	fn K_alpha(&self, alpha_loc: f64) -> f64 
+	fn K_alpha(alpha_loc: f64) -> f64 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
@@ -150,7 +142,34 @@ impl RMesure
 
 		return a * alpha_loc + b
 	}
+	
+}
 
+impl RMesure
+{	
+	pub fn Val(&self) -> f64	{ self.valeur 	}	// LA mesure en cours de traitement
+	pub fn Alpha(&self) -> f64	{ self.alpha 	}	// Taux de confiance
+	pub fn Eps(&self) -> f64 	{ self.epsilon	}	// Incertitude type.
+	pub fn IT(&self) -> f64 	{ self.epsilon * self.K() }	// Intervalle de tolérance = Eps x K
+
+	/// Retourne : (min , 1er quartile , médiane , 3e quartile , max)
+	/// https://fr.wikipedia.org/wiki/Loi_normale#Loi_normale_centr%C3%A9e_r%C3%A9duite
+	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
+	{ 
+		(
+			self.valeur - (self.epsilon * RMesure::K_alpha(99.3)),
+			self.valeur - (self.epsilon * RMesure::K_alpha(50.0)),
+			self.valeur,
+			self.valeur + (self.epsilon * RMesure::K_alpha(50.0)),
+			self.valeur + (self.epsilon * RMesure::K_alpha(99.3)),
+		)
+	}	
+
+	// Coeff d'élargissement
+	fn K(&self) -> f64 
+	{
+		RMesure::K_alpha(self.alpha)
+	}
 }
 
 
