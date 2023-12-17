@@ -7,7 +7,7 @@
 // Ending ta_gueule_le_compilo
 
 
-use core::f64;
+use core::{f64,convert};
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
 //use sscanf::sscanf;
@@ -45,12 +45,20 @@ impl Clone for RMesure
 impl Drop for RMesure { fn drop(&mut self) { } }
 */
 
+impl convert::From<f64> for RMesure 
+{
+    fn from(scalaire: f64) -> Self
+	{
+		RMesure::scalaire(scalaire)
+    }
+}
+
 /// (valeur +/- IT() | alpha%)
 impl fmt::Display for RMesure 
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
 	{
-        write!(f, "({} +/- {} | {}%)", self.valeur, self.IT(), self.alpha)
+        write!(f, "({} +/- {} | {}%)", self.Val(), self.IT(), self.Alpha())
     }
 }
 
@@ -68,7 +76,7 @@ impl RMesure
 
 	pub fn scalaire(valeur: f64) -> Self
 	{
-		Self { valeur, epsilon: 0.0, alpha: 95.45 }
+		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
 
 	/*
