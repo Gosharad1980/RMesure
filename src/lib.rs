@@ -68,7 +68,7 @@ impl RMesure
 
 	pub fn scalaire(valeur: f64) -> Self
 	{
-		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
+		Self { valeur, epsilon: 0.0, alpha: 95.45 }
 	}
 
 	/*
@@ -340,7 +340,7 @@ impl ops::Mul<f64> for RMesure
     type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
     fn mul(self: RMesure, f64_rhs: f64) -> RMesure 
-	{ self - RMesure::scalaire(f64_rhs) }
+	{ self * RMesure::scalaire(f64_rhs) }
 }
 
 // RMesure *= RMesure
@@ -373,7 +373,10 @@ impl ops::Div<RMesure> for RMesure
 
     fn div(self: RMesure, RMesure_rhs: RMesure) -> RMesure
 	{
-		//if RMesure_rhs.valeur == 0.0_f64
+		// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
+		// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
+		//		R.valeur = +/-inf si dénominateur nul
+		//		eps = +inf si dénom est nul
 		if RMesure_rhs == RMesure::scalaire(0.0_f64)
 		{
 			Self
