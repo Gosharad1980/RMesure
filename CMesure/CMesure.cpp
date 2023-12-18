@@ -122,14 +122,14 @@ double CMesure::K(void)
 {
 	// Calcul par interpolation du coeff d'�largissement � l'aide
 	// des valeurs d�crites dans la norme "NF ENV 13005"
-    double p[8] = { 99.95 , 99.73 , 99.00 , 95.45 , 95.00 , 90.00 , 68.27 , 0.000 };
-    double k[8] = { 4.000 , 3.000 , 2.576 , 2.000 , 1.960 , 1.645 , 1.000 , 0.000 };
+    double p[13] = { 99.95 , 99.73 , 99.30, 99.00 , 98.76, 95.45 , 95.00 , 90.00 , 86.64, 68.27 , 50.000, 38.29, 0.000 };
+    double k[13] = { 3.500 , 3.000 , 2.698, 2.576 , 2.500, 2.000 , 1.960 , 1.645 , 1.500, 1.000 , 0.6745, 0.500, 0.000 };
 
     double a, b;
 	int i;
     
     // Recherche du cadran dans lequel on se situe
-	for(i=1; i<8; i++) if(this->alpha >= p[i]) break;
+	for(i=1; i<13; i++) if(this->alpha >= p[i]) break;
 
 	// Interpolation de la valeur du coefficient d'�largissement
     a = (k[i] - k[i-1]) / (p[i] - p[i-1]);
