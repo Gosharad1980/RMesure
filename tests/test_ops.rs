@@ -161,7 +161,7 @@ mod tests
 	{
 		let U: RMesure = RMesure::loi(2.0, 0.01, 'N');
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
-		let resultat = U / V;
+		let resultat = U.clone() / V.clone();
 		assert_eq!(resultat , RMesure::loi(
 			2.0_f64/3.0_f64, 
 			((U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Eps().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64)*2.0_f64, 
@@ -172,7 +172,7 @@ mod tests
     fn test_mesure_div_f64() 
 	{
 		let U: RMesure = RMesure::loi(2.0, 0.01, 'N');
-		let resultat = U / 3.0_f64;
+		let resultat = U.clone() / 3.0_f64;
 		assert_eq!(resultat , RMesure::loi(
 			2.0_f64/3.0_f64, 
 			(U.Eps().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64)*2.0_f64, 
@@ -183,7 +183,7 @@ mod tests
     fn test_f64_div_mesure() 
 	{
 		let U: RMesure = RMesure::loi(3.0, 0.01, 'N');
-		let resultat = 2.0_f64 / U;
+		let resultat = 2.0_f64 / U.clone();
 		assert_eq!(resultat , RMesure::loi(
 			2.0_f64/3.0_f64, 
 			(U.Eps().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64)*2.0_f64, 
@@ -195,7 +195,7 @@ mod tests
 	{
 		let mut U: RMesure = RMesure::loi(2.0, 0.01, 'N');
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
-		U /= V;
+		U /= V.clone();
 		assert_eq!(U , RMesure::loi(
 			2.0_f64/3.0_f64, 
 			((U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Eps().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64)*2.0_f64, 
@@ -217,7 +217,7 @@ mod tests
     fn test_mesure_div_00() 
 	{
 		let U: RMesure = RMesure::loi(-2.0, 0.01, 'N');
-		let resultat = U / 0.0_f64;
+		let resultat = U.clone() / 0.0_f64;
 		assert_eq!(resultat , RMesure::loi(U.Val().signum() * RMESURE_MAX, RMESURE_MAX ,'N')); 
     }
 

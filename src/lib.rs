@@ -10,15 +10,13 @@
 use core::{f64,convert};
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
-//use sscanf::sscanf;
-
 
 
 pub const RMESURE_EPS: f64 = f64::EPSILON;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
-//#[derive(Debug)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
+//#[derive(Debug, Clone, Copy)]
 pub struct RMesure
 {
 	valeur: f64,
@@ -26,8 +24,11 @@ pub struct RMesure
     alpha: f64,
 }
 
-/*
+#[cfg(feature = "MagicEverywhere")]
 impl Copy for RMesure {}
+
+#[cfg(feature = "RealDevOnly")]
+impl Drop for RMesure { fn drop(&mut self) { } }
 
 impl Clone for RMesure 
 {
@@ -42,9 +43,6 @@ impl Clone for RMesure
     }
 }
 
-impl Drop for RMesure { fn drop(&mut self) { } }
-*/
-
 impl convert::From<f64> for RMesure 
 {
     fn from(scalaire: f64) -> Self
@@ -52,6 +50,30 @@ impl convert::From<f64> for RMesure
 		RMesure::scalaire(scalaire)
     }
 }
+
+
+/*
+use sscanf::sscanf;
+impl convert::From<&str> for RMesure 
+{
+	fn from(msg: &str) -> Self
+	{
+		let valeur_loc: f64;
+		let epsilon_loc: f64;
+		let alpha_loc: f64;
+
+		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
+
+		Self 
+		{
+			valeur: valeur_loc, 
+			epsilon: epsilon_loc.abs() / RMesure::K_alpha(alpha_loc), //fabs(it/this->K())
+			alpha: alpha_loc 
+		}
+	}
+}
+*/
+
 
 /// (valeur +/- IT() | alpha%)
 impl fmt::Display for RMesure 
@@ -78,24 +100,6 @@ impl RMesure
 	{
 		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
-
-	/*
-	pub fn load(msg: &str) -> Self
-	{
-		let valeur_loc: f64;
-		let epsilon_loc: f64;
-		let alpha_loc: f64;
-
-		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
-
-		Self 
-		{
-			valeur: valeur_loc, 
-			epsilon: epsilon_loc.abs() / RMesure::K_alpha(alpha_loc), //fabs(it/this->K())
-			alpha: alpha_loc 
-		}
-	}
-	*/
 
 	/// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
 	/// il est possible d'estimer l'incertitude type directement à partir de
@@ -236,14 +240,14 @@ impl ops::Add<f64> for RMesure
 impl ops::AddAssign<RMesure> for RMesure
 {
 	fn add_assign(&mut self, RMesure_rhs: RMesure)
-	{ *self = *self + RMesure_rhs }
+	{ *self = self.clone() + RMesure_rhs }
 }
 
 // RMesure += constante_f64
 impl ops::AddAssign<f64> for RMesure
 {
 	fn add_assign(&mut self, f64_rhs: f64)
-	{ *self = *self + RMesure::scalaire(f64_rhs) }
+	{ *self = self.clone() + RMesure::scalaire(f64_rhs) }
 }
 
 
@@ -300,14 +304,14 @@ impl ops::Sub<f64> for RMesure
 impl ops::SubAssign<RMesure> for RMesure
 {
 	fn sub_assign(&mut self, RMesure_rhs: RMesure)
-	{ *self = *self - RMesure_rhs }
+	{ *self = self.clone() - RMesure_rhs }
 }
 
 // RMesure -= constante_f64
 impl ops::SubAssign<f64> for RMesure
 {
 	fn sub_assign(&mut self, f64_rhs: f64)
-	{ *self = *self - RMesure::scalaire(f64_rhs) }
+	{ *self = self.clone() - RMesure::scalaire(f64_rhs) }
 }
 
 
@@ -355,14 +359,14 @@ impl ops::Mul<f64> for RMesure
 impl ops::MulAssign<RMesure> for RMesure
 {
 	fn mul_assign(&mut self, RMesure_rhs: RMesure)
-	{ *self = *self * RMesure_rhs }
+	{ *self = self.clone() * RMesure_rhs }
 }
 
 // RMesure *= constante_f64
 impl ops::MulAssign<f64> for RMesure
 {
 	fn mul_assign(&mut self, f64_rhs: f64)
-	{ *self = *self * RMesure::scalaire(f64_rhs) }
+	{ *self = self.clone() * RMesure::scalaire(f64_rhs) }
 }
 
 
@@ -430,14 +434,14 @@ impl ops::Div<f64> for RMesure
 impl ops::DivAssign<RMesure> for RMesure
 {
 	fn div_assign(&mut self, RMesure_rhs: RMesure)
-	{ *self = *self / RMesure_rhs }
+	{ *self = self.clone() / RMesure_rhs }
 }
 
 // RMesure /= constante_f64
 impl ops::DivAssign<f64> for RMesure
 {
 	fn div_assign(&mut self, f64_rhs: f64)
-	{ *self = *self / RMesure::scalaire(f64_rhs) }
+	{ *self = self.clone() / RMesure::scalaire(f64_rhs) }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -495,7 +499,7 @@ impl cmp::PartialEq<RMesure> for RMesure
 	///
 	fn eq(&self, RMesure_rhs: &RMesure) -> bool
 	{ 
-		let D: RMesure = *self - *RMesure_rhs;
+		let D: RMesure = self.clone() - RMesure_rhs.clone();
 		D.valeur.abs() <= D.IT()		 
 	}
 }
@@ -504,7 +508,7 @@ impl cmp::PartialOrd<RMesure> for RMesure
 {
 	fn partial_cmp(&self, RMesure_rhs: &RMesure) -> Option<Ordering>
 	{
-		let D: RMesure = *self - *RMesure_rhs;
+		let D: RMesure = self.clone() - RMesure_rhs.clone();
 
 		if D.valeur.abs() <= D.IT() { Some(Ordering::Equal)   }
 		else if D.valeur < -D.IT()  { Some(Ordering::Less)    }
