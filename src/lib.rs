@@ -500,7 +500,7 @@ impl cmp::PartialEq<RMesure> for RMesure
 	fn eq(&self, RMesure_rhs: &RMesure) -> bool
 	{ 
 		let D: RMesure = self.clone() - RMesure_rhs.clone();
-		D.valeur.abs() <= D.IT()		 
+		D.valeur.abs() <= D.IT()
 	}
 }
 
