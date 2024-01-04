@@ -329,7 +329,7 @@ impl ops::Mul<RMesure> for RMesure
 		Self
 		{
 			valeur: self.valeur * RMesure_rhs.valeur,
-			epsilon: (self.Val().powf(2.0_f64) * RMesure_rhs.epsilon.powf(2.0_f64)) + (self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64)).sqrt(),
+			epsilon: ((self.Val().powf(2.0_f64) * RMesure_rhs.epsilon.powf(2.0_f64)) + (self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64))).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }

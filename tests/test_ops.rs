@@ -117,7 +117,7 @@ mod tests
 		let U: RMesure = RMesure::loi(2.0, 0.01, 'N');
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
 		let resultat = U * V;
-		assert_eq!(resultat , RMesure::new(6.0, 0.005 * 13.0_f64.sqrt(), 95.45)); 
+		assert_eq!(resultat , RMesure::new(6.0, 0.005_f64.abs() * 13.0_f64.sqrt(), 95.45)); 
     }
 
 	#[test]
