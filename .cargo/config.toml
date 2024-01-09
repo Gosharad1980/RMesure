@@ -1,4 +1,3 @@
-# .cargo/config
+# .cargo/config.toml
 [build]
-# use the Tlink.x scrip from the cortex-m-rt crate
 rustflags = ["--emit=llvm-ir"]

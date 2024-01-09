@@ -59,7 +59,7 @@ mod tests
 		println!("Loi H ... done");
 		
 		let U: RMesure = RMesure::loi(3.0, 0.01, 'S');
-		let resultat = (U.Val() == 3.0) && (U.Eps() == 0.01_f64/1.4_f64) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 3.0) && (U.Eps() == 0.01_f64/2.0_f64.sqrt()) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("Loi S ... done");
 

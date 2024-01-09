@@ -13,6 +13,7 @@ use std::cmp::Ordering;
 
 
 pub const RMESURE_EPS: f64 = f64::EPSILON;
+//pub const RMESURE_EPS: f64 = 0.0_f64;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
 #[derive(Debug)]
@@ -118,7 +119,7 @@ impl RMesure
 		{
 			'R' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
 			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
-			'S' => inner_epsilon = it.abs() / 1.4_f64,
+			'S' => inner_epsilon = it.abs() / 2.0_f64.sqrt(),
 			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
 			'N' => inner_epsilon = it.abs() / 2.0_f64, 
@@ -136,8 +137,8 @@ impl RMesure
 		// Boîte à moustache :
 		// - la boîte --> 50% --> K = 0.6745
 		// - les moustaches --> 99.3% --> K = 2.698
-		let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76, 95.45 , 95.00 , 90.00 , 86.64, 68.27 , 50.000, 38.29, 0.000];
-		let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500, 2.000 , 1.960 , 1.645 , 1.500, 1.000 , 0.6745, 0.500, 0.000];
+		let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
+		let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
 
 		let mut i = 0;
 
@@ -198,8 +199,14 @@ impl RMesure
 /*                                                                      */
 /************************************************************************/
 
+
+
+// ---------------------------
+// ---------------------------
 // RMesure = RMesure + RMesure
 // ---------------------------
+// ---------------------------
+
 impl ops::Add<RMesure> for RMesure 
 {
     type Output = RMesure;
@@ -253,8 +260,13 @@ impl ops::AddAssign<f64> for RMesure
 
 
 
+
+// ---------------------------
+// ---------------------------
 // RMesure = - RMesure
-// -------------------
+// ---------------------------
+// ---------------------------
+
 impl ops::Neg for RMesure
 {
 	type Output = RMesure;
@@ -317,8 +329,13 @@ impl ops::SubAssign<f64> for RMesure
 
 
 
+
+// ---------------------------
+// ---------------------------
 // RMesure = RMesure * RMesure
 // ---------------------------
+// ---------------------------
+
 impl ops::Mul<RMesure> for RMesure 
 {
     type Output = RMesure;
@@ -373,8 +390,12 @@ impl ops::MulAssign<f64> for RMesure
 
 
 
+// ---------------------------
+// ---------------------------
 // RMesure = RMesure / RMesure
 // ---------------------------
+// ---------------------------
+
 impl ops::Div<RMesure> for RMesure 
 {
     type Output = RMesure;
@@ -479,14 +500,16 @@ impl ops::DivAssign<f64> for RMesure
 //                                                                             //
 /////////////////////////////////////////////////////////////////////////////////
 
-//     bool operator==(const CMesure& M) const;		PartialEq eq
-//     bool operator!=(const CMesure& M) const;		PartialEq ne
-//     bool operator<=(const CMesure& M) const;		PartialOrd partial_cmp
-//     bool operator>=(const CMesure& M) const;		PartialOrd partial_cmp
-//     bool operator< (const CMesure& M) const;		PartialOrd partial_cmp
-//     bool operator> (const CMesure& M) const;		PartialOrd partial_cmp
+//     bool operator==(const CMesure& M) const;		PartialEq eq -> partial_cmp Some(Equal)
+//     bool operator!=(const CMesure& M) const;		PartialEq ne -> !eq -> !partial_cmp Some(Equal)
+//     bool operator<=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less | Equal)
+//     bool operator>=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater | Equal)
+//     bool operator< (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less)
+//     bool operator> (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater)
 
-impl cmp::PartialEq<RMesure> for RMesure 
+
+
+impl cmp::PartialOrd<RMesure> for RMesure 
 {
 	///
 	/// Dans cette classe, les mesures sont considérées comme des
@@ -497,15 +520,7 @@ impl cmp::PartialEq<RMesure> for RMesure
 	/// deux VA testées et à vérifier que sa moyenne est comprise dans
 	/// son propre intervalle de tolérance centré en zéro.
 	///
-	fn eq(&self, RMesure_rhs: &RMesure) -> bool
-	{ 
-		let D: RMesure = self.clone() - RMesure_rhs.clone();
-		D.valeur.abs() <= D.IT()
-	}
-}
 
-impl cmp::PartialOrd<RMesure> for RMesure 
-{
 	fn partial_cmp(&self, RMesure_rhs: &RMesure) -> Option<Ordering>
 	{
 		let D: RMesure = self.clone() - RMesure_rhs.clone();
@@ -513,5 +528,14 @@ impl cmp::PartialOrd<RMesure> for RMesure
 		if D.valeur.abs() <= D.IT() { Some(Ordering::Equal)   }
 		else if D.valeur < -D.IT()  { Some(Ordering::Less)    }
 		else                        { Some(Ordering::Greater) }
+	}
+}
+
+impl cmp::PartialEq<RMesure> for RMesure 
+{
+	fn eq(&self, RMesure_rhs: &RMesure) -> bool
+	{ 
+		//self.partial_cmp(RMesure_rhs).unwrap() == Ordering::Equal
+		matches!(self.partial_cmp(RMesure_rhs), Some(Ordering::Equal))
 	}
 }
