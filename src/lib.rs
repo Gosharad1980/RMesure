@@ -13,7 +13,6 @@ use std::cmp::Ordering;
 
 
 pub const RMESURE_EPS: f64 = f64::EPSILON;
-//pub const RMESURE_EPS: f64 = 0.0_f64;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
 #[derive(Debug)]
@@ -535,7 +534,6 @@ impl cmp::PartialEq<RMesure> for RMesure
 {
 	fn eq(&self, RMesure_rhs: &RMesure) -> bool
 	{ 
-		//self.partial_cmp(RMesure_rhs).unwrap() == Ordering::Equal
 		matches!(self.partial_cmp(RMesure_rhs), Some(Ordering::Equal))
 	}
 }
