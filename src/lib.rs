@@ -15,21 +15,33 @@ use std::cmp::Ordering;
 pub const RMESURE_EPS: f64 = f64::EPSILON;
 pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
-#[derive(Debug)]
-//#[derive(Debug, Clone, Copy)]
+
+#[cfg_attr(
+    all(not(feature = "MagicEverywhere")),
+    derive(Debug)
+)]
+
+
+#[cfg_attr(
+    all(feature = "MagicEverywhere"),
+    derive(Debug, Clone, Copy)
+)]
 pub struct RMesure
 {
 	valeur: f64,
-	uc: f64,
+	epsilon: f64,
     alpha: f64,
 }
 
+/*
 #[cfg(feature = "MagicEverywhere")]
 impl Copy for RMesure {}
+*/
 
-#[cfg(feature = "RealDevOnly")]
+#[cfg(not(feature = "MagicEverywhere"))]
 impl Drop for RMesure { fn drop(&mut self) { } }
 
+#[cfg(not(feature = "MagicEverywhere"))]
 impl Clone for RMesure 
 {
     fn clone(&self) -> Self
@@ -37,11 +49,12 @@ impl Clone for RMesure
 		Self 
 		{ 
 			valeur: self.valeur, 
-			uc: self.uc, 
+			epsilon: self.epsilon, 
 			alpha: self.alpha 
 		}
     }
 }
+
 
 impl convert::From<f64> for RMesure 
 {
@@ -59,15 +72,15 @@ impl convert::From<&str> for RMesure
 	fn from(msg: &str) -> Self
 	{
 		let valeur_loc: f64;
-		let uc_loc: f64;
+		let epsilon_loc: f64;
 		let alpha_loc: f64;
 
-		(valeur_loc, uc_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
+		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
 
 		Self 
 		{
 			valeur: valeur_loc, 
-			uc: uc_loc.abs() / RMesure::K_alpha(alpha_loc), //fabs(it/this->K())
+			epsilon: epsilon_loc.abs() / RMesure::K_alpha(alpha_loc), //fabs(it/this->K())
 			alpha: alpha_loc 
 		}
 	}
@@ -86,46 +99,46 @@ impl fmt::Display for RMesure
 
 impl RMesure 
 {
-    pub fn new(valeur: f64, uc: f64, alpha: f64) -> Self 
+    pub fn new(valeur: f64, epsilon: f64, alpha: f64) -> Self 
 	{
-        Self { valeur, uc, alpha }
+        Self { valeur, epsilon, alpha }
     }
 
 	pub fn zero() -> Self 
 	{
-		Self { valeur: 0.0, uc: RMESURE_EPS, alpha: 95.45 }
+		Self { valeur: 0.0, epsilon: RMESURE_EPS, alpha: 95.45 }
     }
 
 	pub fn scalaire(valeur: f64) -> Self
 	{
-		Self { valeur, uc: RMESURE_EPS, alpha: 95.45 }
+		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
 
 	/// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
 	/// il est possible d'estimer l'incertitude type directement à partir de
 	/// l'intervalle de tolérance à l'aide des lois suivante
 	///
-	///		1) 'R' : Résolution d'un indicateur numérique       : uc = it / rac(12.0)
-	///		2) 'H' : Hystérésis tel que it = MAXI - MINI        : uc = it / rac(12.0)
-	///		3) 'S' : évolution Sinusoïdale sur it = MAXI - MINI : uc = it / 1.4
-	///		4) 'N' : loi Normale par défaut, K = 2              : uc = it / 2.0
-	///		5) 'C' : appareil de Classe +/- it                  : uc = it / rac(3.0)
+	///		1) 'R' : Résolution d'un indicateur numérique       : epsilon = it / rac(12.0)
+	///		2) 'H' : Hystérésis tel que it = MAXI - MINI        : epsilon = it / rac(12.0)
+	///		3) 'S' : évolution Sinusoïdale sur it = MAXI - MINI : epsilon = it / 1.4
+	///		4) 'N' : loi Normale par défaut, K = 2              : epsilon = it / 2.0
+	///		5) 'C' : appareil de Classe +/- it                  : epsilon = it / rac(3.0)
 	pub fn loi(valeur: f64, it: f64, loi: char) -> Self 
 	{
-		let inner_uc: f64;
+		let inner_epsilon: f64;
 
 		match loi
 		{
-			'R' => inner_uc = it.abs() / 12.0_f64.sqrt(),
-			'H' => inner_uc = it.abs() / 12.0_f64.sqrt(),
-			'S' => inner_uc = it.abs() / 2.0_f64.sqrt(),
-			'C' => inner_uc = it.abs() / 3.0_f64.sqrt(),
+			'R' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'S' => inner_epsilon = it.abs() / 2.0_f64.sqrt(),
+			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
-			'N' => inner_uc = it.abs() / 2.0_f64, 
-			_ => inner_uc = it.abs() / 2.0_f64, 
+			'N' => inner_epsilon = it.abs() / 2.0_f64, 
+			_ => inner_epsilon = it.abs() / 2.0_f64, 
 		}
 		
-		Self { valeur, uc: inner_uc, alpha: 95.45 }
+		Self { valeur, epsilon: inner_epsilon, alpha: 95.45 }
 
     }
 
@@ -161,19 +174,19 @@ impl RMesure
 {	
 	pub fn Val(&self) -> f64	{ self.valeur 	}	// LA mesure en cours de traitement
 	pub fn Alpha(&self) -> f64	{ self.alpha 	}	// Taux de confiance
-	pub fn Uc(&self) -> f64 	{ self.uc	}	// Incertitude type.
-	pub fn IT(&self) -> f64 	{ self.uc * self.K() }	// Intervalle de tolérance = Eps x K
+	pub fn Eps(&self) -> f64 	{ self.epsilon	}	// Incertitude type.
+	pub fn IT(&self) -> f64 	{ self.epsilon * self.K() }	// Intervalle de tolérance = Eps x K
 
 	/// Retourne : (min , 1er quartile , médiane , 3e quartile , max)
 	/// https://fr.wikipedia.org/wiki/Loi_normale#Loi_normale_centr%C3%A9e_r%C3%A9duite
 	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
 	{ 
 		(
-			self.valeur - (self.uc * RMesure::K_alpha(99.3)),
-			self.valeur - (self.uc * RMesure::K_alpha(50.0)),
+			self.valeur - (self.epsilon * RMesure::K_alpha(99.3)),
+			self.valeur - (self.epsilon * RMesure::K_alpha(50.0)),
 			self.valeur,
-			self.valeur + (self.uc * RMesure::K_alpha(50.0)),
-			self.valeur + (self.uc * RMesure::K_alpha(99.3)),
+			self.valeur + (self.epsilon * RMesure::K_alpha(50.0)),
+			self.valeur + (self.epsilon * RMesure::K_alpha(99.3)),
 		)
 	}	
 
@@ -216,7 +229,7 @@ impl ops::Add<RMesure> for RMesure
 		Self
 		{
 			valeur: self.valeur + RMesure_rhs.valeur,
-			uc: (self.uc.powf(2.0_f64) + RMesure_rhs.uc.powf(2.0_f64)).sqrt(),
+			epsilon: (self.epsilon.powf(2.0_f64) + RMesure_rhs.epsilon.powf(2.0_f64)).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }
@@ -270,7 +283,7 @@ impl ops::Neg for RMesure
 {
 	type Output = RMesure;
 	fn neg(self) -> RMesure
-	{ RMesure::new(-1.0_f64 * self.valeur, self.uc, self.alpha) }
+	{ RMesure::new(-1.0_f64 * self.valeur, self.epsilon, self.alpha) }
 }
 
 // RMesure = RMesure - RMesure
@@ -285,7 +298,7 @@ impl ops::Sub<RMesure> for RMesure
 		Self
 		{
 			valeur: self.valeur - RMesure_rhs.valeur,
-			uc: (self.uc.powf(2.0_f64) + RMesure_rhs.uc.powf(2.0_f64)).sqrt(),
+			epsilon: (self.epsilon.powf(2.0_f64) + RMesure_rhs.epsilon.powf(2.0_f64)).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }
@@ -345,7 +358,7 @@ impl ops::Mul<RMesure> for RMesure
 		Self
 		{
 			valeur: self.valeur * RMesure_rhs.valeur,
-			uc: ((self.Val().powf(2.0_f64) * RMesure_rhs.uc.powf(2.0_f64)) + (self.uc.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64))).sqrt(),
+			epsilon: ((self.Val().powf(2.0_f64) * RMesure_rhs.epsilon.powf(2.0_f64)) + (self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64))).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }
@@ -414,7 +427,7 @@ impl ops::Div<RMesure> for RMesure
 			Self
 			{
 				valeur: self.valeur.signum() * RMESURE_MAX,
-				uc: RMESURE_MAX,
+				epsilon: RMESURE_MAX,
 				alpha: self.alpha.max(RMesure_rhs.alpha)
 			}
 		}
@@ -423,7 +436,7 @@ impl ops::Div<RMesure> for RMesure
 			Self
 			{
 				valeur: self.valeur / RMesure_rhs.valeur,
-				uc: ((self.uc.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64)) + (RMesure_rhs.uc.powf(2.0_f64) * self.Val().powf(2.0_f64))).sqrt() / RMesure_rhs.valeur.powf(2.0_f64),
+				epsilon: ((self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64)) + (RMesure_rhs.epsilon.powf(2.0_f64) * self.Val().powf(2.0_f64))).sqrt() / RMesure_rhs.valeur.powf(2.0_f64),
 				alpha: self.alpha.max(RMesure_rhs.alpha)
 			}
 		}

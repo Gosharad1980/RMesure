@@ -18,14 +18,14 @@ mod tests
     fn test_new() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 3.0);
-		let resultat = (mesure.Val() == 1.0) && (mesure.Uc() == 2.0) && (mesure.Alpha() == 3.0);
+		let resultat = (mesure.Val() == 1.0) && (mesure.Eps() == 2.0) && (mesure.Alpha() == 3.0);
 		assert_eq!(resultat , true);    
     }
     #[test]
     fn test_zero() 
 	{
 		let mesure: RMesure = RMesure::zero();
-		let resultat = (mesure.Val() == 0.0) && (mesure.Uc() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
+		let resultat = (mesure.Val() == 0.0) && (mesure.Eps() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
 		assert_eq!(resultat , true);    
     }
 
@@ -33,7 +33,7 @@ mod tests
     fn test_from() 
 	{
 		let mesure: RMesure = RMesure::from(1.618);
-		let resultat = (mesure.Val() == 1.618) && (mesure.Uc() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
+		let resultat = (mesure.Val() == 1.618) && (mesure.Eps() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
 		assert_eq!(resultat , true);    
     }
 
@@ -41,7 +41,7 @@ mod tests
     fn test_scalaire() 
 	{
 		let mesure: RMesure = RMesure::scalaire(1.618);
-		let resultat = (mesure.Val() == 1.618) && (mesure.Uc() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
+		let resultat = (mesure.Val() == 1.618) && (mesure.Eps() == RMESURE_EPS) && (mesure.Alpha() == 95.45);
 		assert_eq!(resultat , true);    
     }
 
@@ -49,17 +49,17 @@ mod tests
     fn test_loi() 
 	{
 		let U: RMesure = RMesure::loi(1.0, 0.01, 'R');
-		let resultat = (U.Val() == 1.0) && (U.Uc() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 1.0) && (U.Eps() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("Loi R ... done");
 
 		let U: RMesure = RMesure::loi(2.0, 0.01, 'H');
-		let resultat = (U.Val() == 2.0) && (U.Uc() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 2.0) && (U.Eps() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("Loi H ... done");
 		
 		let U: RMesure = RMesure::loi(3.0, 0.01, 'S');
-		let resultat = (U.Val() == 3.0) && (U.Uc() == 0.01_f64/2.0_f64.sqrt()) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 3.0) && (U.Eps() == 0.01_f64/2.0_f64.sqrt()) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("Loi S ... done");
 
@@ -69,7 +69,7 @@ mod tests
 		println!("Loi N ... done");
 
 		let U: RMesure = RMesure::loi(5.0, 0.01, 'C');
-		let resultat = (U.Val() == 5.0) && (U.Uc() == (0.01_f64/3.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 5.0) && (U.Eps() == (0.01_f64/3.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("Loi C ... done");
 
@@ -87,7 +87,7 @@ mod tests
     fn test_K_alpha() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == (2.0_f64 * mesure.Uc());
+		let resultat = mesure.IT() == (2.0_f64 * mesure.Eps());
 		assert_eq!(resultat , true);         
     }
 
@@ -108,10 +108,10 @@ mod tests
     }
 
 	#[test]
-    fn test_Uc() 
+    fn test_Eps() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 3.0);
-		let resultat = mesure.Uc() == 2.0;
+		let resultat = mesure.Eps() == 2.0;
 		assert_eq!(resultat , true);       
     }
 
@@ -135,7 +135,7 @@ mod tests
     fn test_K() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == (2.0_f64 * mesure.Uc());
+		let resultat = mesure.IT() == (2.0_f64 * mesure.Eps());
 		assert_eq!(resultat , true);     
     }
 

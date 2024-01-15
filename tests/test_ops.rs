@@ -25,7 +25,7 @@ mod tests
 		let V: RMesure = RMesure::loi(12.0, 0.01, 'N');
 
 		let addition = U + V;
-		let resultat = addition.Val() == 24.0_f64 && addition.Uc() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && addition.Alpha() == 95.45_f64;
+		let resultat = addition.Val() == 24.0_f64 && addition.Eps() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && addition.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
@@ -59,7 +59,7 @@ mod tests
 		let V: RMesure = RMesure::loi(12.0, 0.01, 'N');
 		U += V;
 		
-		let resultat = U.Val() == 24.0_f64 && U.Uc() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && U.Alpha() == 95.45_f64;
+		let resultat = U.Val() == 24.0_f64 && U.Eps() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && U.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
@@ -85,7 +85,7 @@ mod tests
 		let V: RMesure = RMesure::loi(10.0, 0.01, 'N');
 		let soustraction = U - V;
 
-		let resultat = soustraction.Val() == 2.0_f64 && soustraction.Uc() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && soustraction.Alpha() == 95.45_f64;
+		let resultat = soustraction.Val() == 2.0_f64 && soustraction.Eps() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && soustraction.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 	
     }
@@ -119,7 +119,7 @@ mod tests
 		let V: RMesure = RMesure::loi(10.0, 0.01, 'N');
 		U -= V;
 
-		let resultat = U.Val() == 2.0_f64 && U.Uc() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && U.Alpha() == 95.45_f64;
+		let resultat = U.Val() == 2.0_f64 && U.Eps() == (0.005_f64.powf(2.0_f64) + 0.005_f64.powf(2.0_f64)).sqrt() && U.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
@@ -148,7 +148,7 @@ mod tests
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
 		let multiplication = U.clone() * V.clone();
 		
-		let resultat = multiplication.Val() == 6.0_f64 && multiplication.Uc() == ((U.Val().powf(2.0_f64) * V.Uc().powf(2.0_f64)) + (U.Uc().powf(2.0_f64) * V.Val().powf(2.0_f64))).sqrt() && multiplication.Alpha() == 95.45_f64;
+		let resultat = multiplication.Val() == 6.0_f64 && multiplication.Eps() == ((U.Val().powf(2.0_f64) * V.Eps().powf(2.0_f64)) + (U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64))).sqrt() && multiplication.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
@@ -181,11 +181,11 @@ mod tests
 		let mut U: RMesure = RMesure::loi(2.0, 0.01, 'N');
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
 
-		let multiplication_Eps = ((U.Val().powf(2.0_f64) * V.Uc().powf(2.0_f64)) + (U.Uc().powf(2.0_f64) * V.Val().powf(2.0_f64))).sqrt();
+		let multiplication_Eps = ((U.Val().powf(2.0_f64) * V.Eps().powf(2.0_f64)) + (U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64))).sqrt();
 
 		U *= V;
 
-		let resultat = U.Val() == 6.0_f64 && U.Uc() == multiplication_Eps && U.Alpha() == 95.45_f64;
+		let resultat = U.Val() == 6.0_f64 && U.Eps() == multiplication_Eps && U.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
@@ -213,10 +213,10 @@ mod tests
 		let division = U.clone() / V.clone();
 
 		let resultat_val = 2.0_f64/3.0_f64;
-		let resultat_eps = ((U.Uc().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Uc().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64);
+		let resultat_eps = ((U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Eps().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64);
 		let resultat_alf = 95.45_f64;
 
-		let resultat = division.Val() == resultat_val && division.Uc() == resultat_eps && division.Alpha() == resultat_alf;
+		let resultat = division.Val() == resultat_val && division.Eps() == resultat_eps && division.Alpha() == resultat_alf;
 
 		assert_eq!(resultat , true);
     }
@@ -228,10 +228,10 @@ mod tests
 		let division = U.clone() / 3.0_f64;
 
 		let resultat_val = 2.0_f64/3.0_f64;
-		let resultat_eps = (U.Uc().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64);
+		let resultat_eps = (U.Eps().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64);
 		let resultat_alf = 95.45_f64;
 
-		let resultat = division.Val() == resultat_val && division.Uc() == resultat_eps && division.Alpha() == resultat_alf;
+		let resultat = division.Val() == resultat_val && division.Eps() == resultat_eps && division.Alpha() == resultat_alf;
 
 		assert_eq!(resultat , true);
     }
@@ -243,10 +243,10 @@ mod tests
 		let division = 2.0_f64 / U.clone();
 
 		let resultat_val = 2.0_f64/3.0_f64;
-		let resultat_eps = (U.Uc().powf(2.0_f64) * 2.0_f64.powf(2.0_f64)).sqrt() / U.Val().powf(2.0_f64);
+		let resultat_eps = (U.Eps().powf(2.0_f64) * 2.0_f64.powf(2.0_f64)).sqrt() / U.Val().powf(2.0_f64);
 		let resultat_alf = 95.45_f64;
 
-		let resultat = division.Val() == resultat_val && division.Uc() == resultat_eps && division.Alpha() == resultat_alf;
+		let resultat = division.Val() == resultat_val && division.Eps() == resultat_eps && division.Alpha() == resultat_alf;
 
 		assert_eq!(resultat , true);
     }
@@ -258,12 +258,12 @@ mod tests
 		let V: RMesure = RMesure::loi(3.0, 0.01, 'N');
 		
 		let resultat_val = 2.0_f64/3.0_f64;
-		let resultat_eps = ((U.Uc().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Uc().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64);
+		let resultat_eps = ((U.Eps().powf(2.0_f64) * V.Val().powf(2.0_f64)) + (V.Eps().powf(2.0_f64) * U.Val().powf(2.0_f64))).sqrt() / V.Val().powf(2.0_f64);
 		let resultat_alf = 95.45_f64;
 
 		U /= V.clone();
 		
-		let resultat = U.Val() == resultat_val && U.Uc() == resultat_eps && U.Alpha() == resultat_alf;
+		let resultat = U.Val() == resultat_val && U.Eps() == resultat_eps && U.Alpha() == resultat_alf;
 
 		assert_eq!(resultat , true);
     }
@@ -274,12 +274,12 @@ mod tests
 		let mut U: RMesure = RMesure::loi(2.0, 0.01, 'N');
 
 		let resultat_val = 2.0_f64/3.0_f64;
-		let resultat_eps = (U.Uc().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64);
+		let resultat_eps = (U.Eps().powf(2.0_f64) * 3.0_f64.powf(2.0_f64)).sqrt() / 3.0_f64.powf(2.0_f64);
 		let resultat_alf = 95.45_f64;
 
 		U /= 3.0_f64;
 
-		let resultat = U.Val() == resultat_val && U.Uc() == resultat_eps && U.Alpha() == resultat_alf;
+		let resultat = U.Val() == resultat_val && U.Eps() == resultat_eps && U.Alpha() == resultat_alf;
 
 		assert_eq!(resultat , true);
     }
@@ -290,7 +290,7 @@ mod tests
 		let U: RMesure = RMesure::loi(-2.0, 0.01, 'N');
 		let division = U.clone() / 0.0_f64;
 
-		let resultat = division.Val() == (U.Val().signum() * RMESURE_MAX) && division.Uc() == RMESURE_MAX && division.Alpha() == 95.45_f64;
+		let resultat = division.Val() == (U.Val().signum() * RMESURE_MAX) && division.Eps() == RMESURE_MAX && division.Alpha() == 95.45_f64;
 
 		assert_eq!(resultat , true); 
     }
