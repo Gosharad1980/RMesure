@@ -8,6 +8,7 @@
 
 
 use core::{f64,convert};
+use std::ops::Add;
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
 
@@ -26,12 +27,14 @@ pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
     all(feature = "MagicEverywhere"),
     derive(Debug, Clone, Copy)
 )]
-pub struct RMesure
+pub struct RMesure<TypeFloat>
 {
-	valeur: f64,
-	epsilon: f64,
-    alpha: f64,
+	valeur: TypeFloat,
+	epsilon: TypeFloat,
+    alpha: TypeFloat,
 }
+
+
 
 /*
 #[cfg(feature = "MagicEverywhere")]
@@ -39,12 +42,12 @@ impl Copy for RMesure {}
 */
 
 #[cfg(not(feature = "MagicEverywhere"))]
-impl Drop for RMesure { fn drop(&mut self) { } }
+impl<TypeFloat> Drop for RMesure<TypeFloat> { fn drop(&mut self) { } }
 
 #[cfg(not(feature = "MagicEverywhere"))]
-impl Clone for RMesure 
+impl<TypeFloat> Clone for RMesure<TypeFloat> 
 {
-	fn clone(&self) -> RMesure
+    fn clone(&self) -> RMesure<TypeFloat>
 	{
 		RMesure 
 		{ 
@@ -56,9 +59,9 @@ impl Clone for RMesure
 }
 
 
-impl convert::From<f64> for RMesure 
+impl<TypeFloat> convert::From<TypeFloat> for RMesure<TypeFloat> 
 {
-    fn from(scalaire: f64) -> RMesure
+    fn from(scalaire: TypeFloat) -> RMesure<TypeFloat>
 	{
 		RMesure::scalaire(scalaire)
     }
@@ -89,7 +92,7 @@ impl convert::From<&str> for RMesure
 
 
 /// (valeur +/- IT() | alpha%)
-impl fmt::Display for RMesure 
+impl<TypeFloat> fmt::Display for RMesure<TypeFloat> 
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
 	{
@@ -97,21 +100,21 @@ impl fmt::Display for RMesure
     }
 }
 
-impl RMesure 
+impl<TypeFloat> RMesure<TypeFloat> 
 {
-    pub fn new(valeur: f64, epsilon: f64, alpha: f64) -> RMesure 
+    pub fn new(valeur: TypeFloat, epsilon: TypeFloat, alpha: TypeFloat) -> RMesure<TypeFloat> 
 	{
         Self { valeur, epsilon, alpha }
     }
 
-	pub fn zero() -> RMesure 
+	pub fn zero() -> RMesure<TypeFloat>  
 	{
 		Self { valeur: 0.0, epsilon: RMESURE_EPS, alpha: 95.45 }
     }
 
-	pub fn scalaire(valeur: f64) -> RMesure
+	pub fn scalaire(valeur: TypeFloat) -> RMesure<TypeFloat> 
 	{
-		Self { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
+		RMesure { valeur, epsilon: RMESURE_EPS, alpha: 95.45 }
 	}
 
 	/// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
@@ -123,34 +126,34 @@ impl RMesure
 	///		3) 'S' : évolution Sinusoïdale sur it = MAXI - MINI : epsilon = it / 1.4
 	///		4) 'N' : loi Normale par défaut, K = 2              : epsilon = it / 2.0
 	///		5) 'C' : appareil de Classe +/- it                  : epsilon = it / rac(3.0)
-	pub fn loi(valeur: f64, it: f64, loi: char) -> RMesure 
+	pub fn loi(valeur: TypeFloat, it: TypeFloat, loi: char) -> RMesure<TypeFloat>  
 	{
-		let inner_epsilon: f64;
+		let inner_epsilon: TypeFloat;
 
 		match loi
 		{
-			'R' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
-			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
-			'S' => inner_epsilon = it.abs() / 2.0_f64.sqrt(),
-			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
+			'R' => inner_epsilon = it.abs() / 12.0.sqrt(),
+			'H' => inner_epsilon = it.abs() / 12.0.sqrt(),
+			'S' => inner_epsilon = it.abs() / 2.0.sqrt(),
+			'C' => inner_epsilon = it.abs() / 3.0.sqrt(),
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
-			'N' => inner_epsilon = it.abs() / 2.0_f64, 
-			_ => inner_epsilon = it.abs() / 2.0_f64, 
+			'N' => inner_epsilon = it.abs() / 2.0, 
+			_ => inner_epsilon = it.abs() / 2.0, 
 		}
 		
-		Self { valeur, epsilon: inner_epsilon, alpha: 95.45 }
+		RMesure { valeur, epsilon: inner_epsilon, alpha: 95.45 }
 
     }
 
-	fn K_alpha(alpha_loc: f64) -> f64 
+	fn K_alpha(alpha_loc: TypeFloat) -> TypeFloat 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
 		// Boîte à moustache :
 		// - la boîte --> 50% --> K = 0.6745
 		// - les moustaches --> 99.3% --> K = 2.698
-		let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
-		let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
+		let p: [TypeFloat; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
+		let k: [TypeFloat; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
 
 		let mut i = 0;
 
@@ -170,16 +173,16 @@ impl RMesure
 	
 }
 
-impl RMesure
+impl<TypeFloat> RMesure<TypeFloat>
 {	
-	pub fn Val(&self) -> f64	{ self.valeur 	}	// LA mesure en cours de traitement
-	pub fn Alpha(&self) -> f64	{ self.alpha 	}	// Taux de confiance
-	pub fn Eps(&self) -> f64 	{ self.epsilon	}	// Incertitude type.
-	pub fn IT(&self) -> f64 	{ self.epsilon * self.K() }	// Intervalle de tolérance = Eps x K
+	pub fn Val(&self) -> TypeFloat	{ self.valeur 	}	// LA mesure en cours de traitement
+	pub fn Alpha(&self) -> TypeFloat	{ self.alpha 	}	// Taux de confiance
+	pub fn Eps(&self) -> TypeFloat 	{ self.epsilon	}	// Incertitude type.
+	pub fn IT(&self) -> TypeFloat 	{ self.epsilon * self.K() }	// Intervalle de tolérance = Eps x K
 
 	/// Retourne : (min , 1er quartile , médiane , 3e quartile , max)
 	/// https://fr.wikipedia.org/wiki/Loi_normale#Loi_normale_centr%C3%A9e_r%C3%A9duite
-	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
+	pub fn BoxPlot(&self) -> (TypeFloat,TypeFloat,TypeFloat,TypeFloat,TypeFloat) 	
 	{ 
 		(
 			self.valeur - (self.epsilon * RMesure::K_alpha(99.3)),
@@ -191,7 +194,7 @@ impl RMesure
 	}	
 
 	// Coeff d'élargissement
-	fn K(&self) -> f64 
+	fn K(&self) -> TypeFloat 
 	{
 		RMesure::K_alpha(self.alpha)
 	}
@@ -219,17 +222,17 @@ impl RMesure
 // ---------------------------
 // ---------------------------
 
-impl ops::Add<RMesure> for RMesure 
+impl<TypeFloat> ops::Add<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+    fn add(self: RMesure<TypeFloat>, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat>
 	{
-		Self
+		RMesure
 		{
 			valeur: self.valeur + RMesure_rhs.valeur,
-			epsilon: (self.epsilon.powf(2.0_f64) + RMesure_rhs.epsilon.powf(2.0_f64)).sqrt(),
+			epsilon: (self.epsilon.powf(2.0) + RMesure_rhs.epsilon.powf(2.0)).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }
@@ -237,36 +240,36 @@ impl ops::Add<RMesure> for RMesure
 
 // RMesure = constante_f64 + RMesure
 // f64.add(RMesure)
-impl ops::Add<RMesure> for f64 
+impl<TypeFloat: Add> ops::Add<RMesure<TypeFloat>> for TypeFloat 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: f64, RMesure_rhs: RMesure) -> RMesure 
+    fn add(self: TypeFloat, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat> 
 	{ RMesure::scalaire(self) + RMesure_rhs }
 }
 
 // RMesure = RMesure + constante_f64
 // RMesure.add(f64)
-impl ops::Add<f64> for RMesure 
+impl<TypeFloat> ops::Add<TypeFloat> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: RMesure, f64_rhs: f64) -> RMesure 
-	{ self + RMesure::scalaire(f64_rhs) }
+    fn add(self: RMesure<TypeFloat>, TypeFloat_rhs: TypeFloat) -> RMesure<TypeFloat> 
+	{ self + RMesure::scalaire(TypeFloat_rhs) }
 }
 
 // RMesure += RMesure
-impl ops::AddAssign<RMesure> for RMesure
+impl<TypeFloat> ops::AddAssign<RMesure<TypeFloat>> for RMesure<TypeFloat>
 {
-	fn add_assign(&mut self, RMesure_rhs: RMesure)
+	fn add_assign(&mut self, RMesure_rhs: RMesure<TypeFloat>)
 	{ *self = self.clone() + RMesure_rhs }
 }
 
 // RMesure += constante_f64
-impl ops::AddAssign<f64> for RMesure
+impl<TypeFloat> ops::AddAssign<TypeFloat> for RMesure<TypeFloat>
 {
-	fn add_assign(&mut self, f64_rhs: f64)
-	{ *self = self.clone() + RMesure::scalaire(f64_rhs) }
+	fn add_assign(&mut self, TypeFloat_rhs: TypeFloat)
+	{ *self = self.clone() + RMesure::scalaire(TypeFloat_rhs) }
 }
 
 
@@ -279,26 +282,26 @@ impl ops::AddAssign<f64> for RMesure
 // ---------------------------
 // ---------------------------
 
-impl ops::Neg for RMesure
+impl<TypeFloat> ops::Neg for RMesure<TypeFloat>
 {
-	type Output = RMesure;
-	fn neg(self) -> RMesure
-	{ RMesure::new(-1.0_f64 * self.valeur, self.epsilon, self.alpha) }
+	type Output = RMesure<TypeFloat>;
+	fn neg(self) -> RMesure<TypeFloat>
+	{ RMesure::new(-1.0 * self.valeur, self.epsilon, self.alpha) }
 }
 
 // RMesure = RMesure - RMesure
 // ---------------------------
 
-impl ops::Sub<RMesure> for RMesure 
+impl<TypeFloat> ops::Sub<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+    fn sub(self: RMesure<TypeFloat>, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat>
 	{
-		Self
+		RMesure
 		{
 			valeur: self.valeur - RMesure_rhs.valeur,
-			epsilon: (self.epsilon.powf(2.0_f64) + RMesure_rhs.epsilon.powf(2.0_f64)).sqrt(),
+			epsilon: (self.epsilon.powf(2.0) + RMesure_rhs.epsilon.powf(2.0)).sqrt(),
 			alpha: self.alpha.max(RMesure_rhs.alpha)
 		}
     }
@@ -306,36 +309,36 @@ impl ops::Sub<RMesure> for RMesure
 
 // RMesure = constante_f64 - RMesure
 // f64.sub(RMesure)
-impl ops::Sub<RMesure> for f64 
+impl<TypeFloat> ops::Sub<RMesure<TypeFloat>> for TypeFloat 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: f64, RMesure_rhs: RMesure) -> RMesure 
+    fn sub(self: TypeFloat, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat> 
 	{ RMesure::scalaire(self) - RMesure_rhs }
 }
 
 // RMesure = RMesure - constante_f64
 // RMesure.sub(f64)
-impl ops::Sub<f64> for RMesure 
+impl<TypeFloat> ops::Sub<TypeFloat> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: RMesure, f64_rhs: f64) -> RMesure 
-	{ self - RMesure::scalaire(f64_rhs) }
+    fn sub(self: RMesure<TypeFloat>, TypeFloat_rhs: TypeFloat) -> RMesure<TypeFloat> 
+	{ self - RMesure::scalaire(TypeFloat_rhs) }
 }
 
 // RMesure -= RMesure
-impl ops::SubAssign<RMesure> for RMesure
+impl<TypeFloat> ops::SubAssign<RMesure<TypeFloat>> for RMesure<TypeFloat>
 {
-	fn sub_assign(&mut self, RMesure_rhs: RMesure)
+	fn sub_assign(&mut self, RMesure_rhs: RMesure<TypeFloat>)
 	{ *self = self.clone() - RMesure_rhs }
 }
 
 // RMesure -= constante_f64
-impl ops::SubAssign<f64> for RMesure
+impl<TypeFloat> ops::SubAssign<TypeFloat> for RMesure<TypeFloat>
 {
-	fn sub_assign(&mut self, f64_rhs: f64)
-	{ *self = self.clone() - RMesure::scalaire(f64_rhs) }
+	fn sub_assign(&mut self, TypeFloat_rhs: TypeFloat)
+	{ *self = self.clone() - RMesure::scalaire(TypeFloat_rhs) }
 }
 
 
@@ -348,14 +351,14 @@ impl ops::SubAssign<f64> for RMesure
 // ---------------------------
 // ---------------------------
 
-impl ops::Mul<RMesure> for RMesure 
+impl<TypeFloat> ops::Mul<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
 
-    fn mul(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+    fn mul(self: RMesure<TypeFloat>, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat>
 	{
-		Self
+		RMesure
 		{
 			valeur: self.valeur * RMesure_rhs.valeur,
 			epsilon: ((self.Val().powf(2.0_f64) * RMesure_rhs.epsilon.powf(2.0_f64)) + (self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64))).sqrt(),
@@ -366,36 +369,36 @@ impl ops::Mul<RMesure> for RMesure
 
 // RMesure = constante_f64 * RMesure
 // f64.mul(RMesure)
-impl ops::Mul<RMesure> for f64 
+impl<TypeFloat> ops::Mul<RMesure<TypeFloat>> for TypeFloat 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: f64, RMesure_rhs: RMesure) -> RMesure 
+    fn mul(self: TypeFloat, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat> 
 	{ RMesure::scalaire(self) * RMesure_rhs }
 }
 
 // RMesure = RMesure * constante_f64
 // RMesure.mul(f64)
-impl ops::Mul<f64> for RMesure 
+impl<TypeFloat> ops::Mul<TypeFloat> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: RMesure, f64_rhs: f64) -> RMesure 
-	{ self * RMesure::scalaire(f64_rhs) }
+    fn mul(self: RMesure<TypeFloat>, TypeFloat_rhs: TypeFloat) -> RMesure<TypeFloat> 
+	{ self * RMesure::scalaire(TypeFloat_rhs) }
 }
 
 // RMesure *= RMesure
-impl ops::MulAssign<RMesure> for RMesure
+impl<TypeFloat> ops::MulAssign<RMesure<TypeFloat>> for RMesure<TypeFloat>
 {
-	fn mul_assign(&mut self, RMesure_rhs: RMesure)
+	fn mul_assign(&mut self, RMesure_rhs: RMesure<TypeFloat>)
 	{ *self = self.clone() * RMesure_rhs }
 }
 
 // RMesure *= constante_f64
-impl ops::MulAssign<f64> for RMesure
+impl<TypeFloat> ops::MulAssign<TypeFloat> for RMesure<TypeFloat>
 {
-	fn mul_assign(&mut self, f64_rhs: f64)
-	{ *self = self.clone() * RMesure::scalaire(f64_rhs) }
+	fn mul_assign(&mut self, TypeFloat_rhs: TypeFloat)
+	{ *self = self.clone() * RMesure::scalaire(TypeFloat_rhs) }
 }
 
 
@@ -408,23 +411,23 @@ impl ops::MulAssign<f64> for RMesure
 // ---------------------------
 // ---------------------------
 
-impl ops::Div<RMesure> for RMesure 
+impl<TypeFloat> ops::Div<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
 	/// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
 	///		R.valeur = +/-inf si dénominateur nul
 	///		eps = +inf si dénom est nul
 
-    fn div(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+    fn div(self: RMesure<TypeFloat>, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat>
 	{
 		// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
 		// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
 		//		R.valeur = +/-inf si dénominateur nul
 		//		eps = +inf si dénom est nul
-		if RMesure_rhs == RMesure::scalaire(0.0_f64)
+		if RMesure_rhs == RMesure::scalaire(0.0)
 		{
-			Self
+			RMesure
 			{
 				valeur: self.valeur.signum() * RMESURE_MAX,
 				epsilon: RMESURE_MAX,
@@ -433,10 +436,10 @@ impl ops::Div<RMesure> for RMesure
 		}
 		else
 		{
-			Self
+			RMesure
 			{
 				valeur: self.valeur / RMesure_rhs.valeur,
-				epsilon: ((self.epsilon.powf(2.0_f64) * RMesure_rhs.valeur.powf(2.0_f64)) + (RMesure_rhs.epsilon.powf(2.0_f64) * self.Val().powf(2.0_f64))).sqrt() / RMesure_rhs.valeur.powf(2.0_f64),
+				epsilon: ((self.epsilon.powf(2.0) * RMesure_rhs.valeur.powf(2.0)) + (RMesure_rhs.epsilon.powf(2.0) * self.Val().powf(2.0))).sqrt() / RMesure_rhs.valeur.powf(2.0),
 				alpha: self.alpha.max(RMesure_rhs.alpha)
 			}
 		}
@@ -445,36 +448,36 @@ impl ops::Div<RMesure> for RMesure
 
 // RMesure = constante_f64 / RMesure
 // f64.div(RMesure)
-impl ops::Div<RMesure> for f64 
+impl<TypeFloat> ops::Div<RMesure<TypeFloat>> for TypeFloat 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: f64, RMesure_rhs: RMesure) -> RMesure 
+    fn div(self: TypeFloat, RMesure_rhs: RMesure<TypeFloat>) -> RMesure<TypeFloat> 
 	{ RMesure::scalaire(self) / RMesure_rhs }
 }
 
 // RMesure = RMesure / constante_f64
 // RMesure.div(f64)
-impl ops::Div<f64> for RMesure 
+impl<TypeFloat> ops::Div<TypeFloat> for RMesure<TypeFloat> 
 {
-    type Output = RMesure;
+    type Output = RMesure<TypeFloat>;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: RMesure, f64_rhs: f64) -> RMesure 
-	{ self / RMesure::scalaire(f64_rhs) }
+    fn div(self: RMesure<TypeFloat>, TypeFloat_rhs: TypeFloat) -> RMesure<TypeFloat> 
+	{ self / RMesure::scalaire(TypeFloat_rhs) }
 }
 
 // RMesure /= RMesure
-impl ops::DivAssign<RMesure> for RMesure
+impl<TypeFloat> ops::DivAssign<RMesure<TypeFloat>> for RMesure<TypeFloat>
 {
-	fn div_assign(&mut self, RMesure_rhs: RMesure)
+	fn div_assign(&mut self, RMesure_rhs: RMesure<TypeFloat>)
 	{ *self = self.clone() / RMesure_rhs }
 }
 
 // RMesure /= constante_f64
-impl ops::DivAssign<f64> for RMesure
+impl<TypeFloat> ops::DivAssign<TypeFloat> for RMesure<TypeFloat>
 {
-	fn div_assign(&mut self, f64_rhs: f64)
-	{ *self = self.clone() / RMesure::scalaire(f64_rhs) }
+	fn div_assign(&mut self, TypeFloat_rhs: TypeFloat)
+	{ *self = self.clone() / RMesure::scalaire(TypeFloat_rhs) }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -521,7 +524,7 @@ impl ops::DivAssign<f64> for RMesure
 
 
 
-impl cmp::PartialOrd<RMesure> for RMesure 
+impl<TypeFloat> cmp::PartialOrd<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
 	///
 	/// Dans cette classe, les mesures sont considérées comme des
@@ -533,9 +536,9 @@ impl cmp::PartialOrd<RMesure> for RMesure
 	/// son propre intervalle de tolérance centré en zéro.
 	///
 
-	fn partial_cmp(&self, RMesure_rhs: &RMesure) -> Option<Ordering>
+	fn partial_cmp(&self, RMesure_rhs: &RMesure<TypeFloat>) -> Option<Ordering>
 	{
-		let D: RMesure = self.clone() - RMesure_rhs.clone();
+		let D: RMesure<TypeFloat> = self.clone() - RMesure_rhs.clone();
 
 		if D.valeur.abs() <= D.IT() { Some(Ordering::Equal)   }
 		else if D.valeur < -D.IT()  { Some(Ordering::Less)    }
@@ -543,9 +546,9 @@ impl cmp::PartialOrd<RMesure> for RMesure
 	}
 }
 
-impl cmp::PartialEq<RMesure> for RMesure 
+impl<TypeFloat> cmp::PartialEq<RMesure<TypeFloat>> for RMesure<TypeFloat> 
 {
-	fn eq(&self, RMesure_rhs: &RMesure) -> bool
+	fn eq(&self, RMesure_rhs: &RMesure<TypeFloat>) -> bool
 	{ 
 		matches!(self.partial_cmp(RMesure_rhs), Some(Ordering::Equal))
 	}
