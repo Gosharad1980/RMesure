@@ -2,7 +2,7 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 //#![allow(unused_variables)]
-//#![allow(dead_code)]
+#![allow(dead_code)]
 //#![allow(unused_assignments)]
 // Ending ta_gueule_le_compilo
 
@@ -10,7 +10,6 @@
 use core::{f32,convert};
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
-
 
 pub const RMESURE_EPS: f32 = f32::EPSILON;
 pub const RMESURE_MAX: f32 = 9223371500000000000.0_f32; //f32::MAX.sqrt()/2.0;
@@ -99,7 +98,7 @@ impl Default for RMesure { fn default() -> RMesure { RMesure::zero() } }
 
 impl RMesure 
 {
-    pub fn new(valeur: f32, sigma: f32, alpha: f32) -> RMesure 	{ Self { valeur,      variance: sigma.powf(2.0_f32),       alpha        } }
+    pub fn new(valeur: f32, sigma: f32, alpha: f32) -> RMesure 	{ Self { valeur,      variance:       sigma.powf(2.0_f32), alpha        } }
 	pub fn zero() -> RMesure 									{ Self { valeur: 0.0, variance: RMESURE_EPS.powf(2.0_f32), alpha: 95.45 } }
 	pub fn scalaire(valeur: f32) -> RMesure						{ Self { valeur,      variance: RMESURE_EPS.powf(2.0_f32), alpha: 95.45 } }
 
@@ -581,11 +580,392 @@ impl cmp::PartialEq<RMesure> for RMesure
 
 
 
-/////////////////////////////////////////////////////////////////////////////////
-//                                                                             //
-//        Et si on traitait les RMesures comme des >Floats legit ?             //
-//        --------------------------------------------------------             //
-//                                                                             //
-/////////////////////////////////////////////////////////////////////////////////
+/************************************************************************/
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/*          Surdéfinition des Fonctions mathématiques                  */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/************************************************************************/
 
 
+// Les fonctions suivantes nécessite l'utilisation
+// de la loi de propagation des incertitudes.
+// cf norme NF ENV 13005 (Guide d'Utilisation de la Métrologie : GUM)
+
+
+// 1 - ce groupe de fonction est à une seule variable,
+// ce qui donne, pour l'équation y = f(x), la formule suivante:
+// U²(y) = [df(x)/dx]² * U²(x)
+
+impl RMesure 
+{
+	pub fn abs(self) -> RMesure 
+	{
+		// si M.Val() <  0 => fabs(M.Val()) = -1.0 * M.Val() et df = -1
+		// si M.Val() >= 0 => fabs(M.Val()) =  1.0 * M.Val() et df =  1
+		// dans tous les cas, lorsque df sera élevé au carré, df² = 1
+		// => U²(x) = sqrt(M.Eps() * M.Eps()) = fabs(M. Eps())
+
+		Self
+		{
+			valeur: self.Val().abs(),
+			variance: self.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+	pub fn recip(self) -> RMesure { 1.0_f32 / self }
+
+	pub fn sin(self) -> RMesure
+	{
+		// d[sin(x)] = cos(x)
+		Self
+		{
+			valeur: self.Val().sin(),
+			variance: self.Val().cos().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+    pub fn cos(self) -> RMesure 
+	{
+		// d[cos(x)] = -sin(x)
+		// df² = (-1 * sin(x) )² = sin(x)²
+		Self
+		{
+			valeur: self.Val().cos(),
+			variance: self.Val().sin().powf(2.0_f32) * self.Variance(), 
+			alpha: self.Alpha()
+		}
+	}
+
+    pub fn tan(self) -> RMesure 
+	{
+		// d[tan(x)] = 1 + tan²(x)
+		Self
+		{
+			valeur: self.Val().tan(),
+			variance: (1.0_f32 + self.Val().tan().powf(2.0_f32)).powf(2.0_f32) * self.Variance(), 
+			alpha: self.Alpha()
+		}
+	}
+
+    pub fn asin(self) -> RMesure 
+	{
+		// d[asin(x)] = 1 / sqrt(1 - x²)
+		// df² = 1² / sqrt(1 - x²)²
+		// df² = 1 / (1 - x²)
+		Self
+		{
+			valeur: self.Val().asin(),
+			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip() * self.Variance(), 
+			alpha: self.Alpha()
+		}		
+	}
+
+    pub fn acos(self) -> RMesure 
+	{ 	
+		// d[acos(x)] = -1 / rac(1 - x²) 
+		// df² = (-1)² / sqrt(1 - x²)²
+		// df² = 1 / (1 - x²)
+		Self
+		{
+			valeur: self.Val().acos(),
+			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip() * self.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+    pub fn atan(self) -> RMesure
+	{
+		// d[atan(x)] = 1 / (1 - x²)
+		Self
+		{
+			valeur: self.Val().atan(),
+			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+	
+	pub fn sinh(self) -> RMesure
+	{
+		// d[sinh(x)] = cosh(x)
+		Self
+		{
+			valeur: self.Val().sinh(),
+			variance: self.Val().cosh().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+    
+	pub fn cosh(self) -> RMesure 
+	{
+		// d[acos(x)] = sinh(x)
+		Self
+		{
+			valeur: self.Val().cosh(),
+			variance: self.Val().sinh().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+
+    pub fn tanh(self) -> RMesure 
+	{
+		// d[tanh(x)] = 1 + tanh²(x)
+		Self
+		{
+			valeur: self.Val().tanh(),
+			variance: (1.0_f32 + self.Val().tanh().powf(2.0_f32)).powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+
+	pub fn asinh(self) -> RMesure 
+	{
+		// d[asinh(x)] = 1 / sqrt(x² + 1)
+		Self
+		{
+			valeur: self.Val().asinh(),
+			variance: (self.Val().powf(2.0_f32) + 1.0_f32).sqrt().recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+    pub fn acosh(self) -> RMesure 
+	{
+		// d[acosh(x)] = 1 / sqrt(x² - 1)
+		Self
+		{
+			valeur: self.Val().acosh(),
+			variance: (self.Val().powf(2.0_f32) - 1.0_f32).sqrt().recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+
+    pub fn atanh(self) -> RMesure 
+	{
+		// d[atanh(x)] = 1 / (1 - x²)
+		Self
+		{
+			valeur: self.Val().atanh(),
+			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+
+	pub fn sin_cos(self) -> (RMesure, RMesure) { (self.clone().sin() , self.cos()) }
+
+	pub fn ln(self) -> RMesure 
+	{
+		// d[log(x)] = 1 / x
+		Self
+		{
+			valeur: self.Val().ln(),
+			variance: self.Val().recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+
+    pub fn log2(self)  -> RMesure { self.log(2.0_f32.into()) }
+	pub fn log10(self) -> RMesure { self.log(10.0_f32.into()) }
+	pub fn ln_1p(self) -> RMesure { (1.0_f32 + self).ln() }
+
+
+    pub fn exp(self) -> RMesure 
+	{
+		// d[exp(x)] = exp(x)
+		Self
+		{
+			valeur: self.Val().exp(),
+			variance: self.Val().exp().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+    
+	pub fn exp2(self)   -> RMesure { RMesure::from(2.0_f32).powf(self) }
+    pub fn exp_m1(self) -> RMesure { self.exp() - RMesure::from(1.0_f32) }
+
+
+	pub fn sqrt(self) -> RMesure
+	{
+		// d[rac(x)] = 1 / (2 * rac(x))
+		Self
+		{
+			valeur: self.Val().sqrt(),
+			variance: (2.0_f32 * self.Val().sqrt()).recip().powf(2.0_f32) * self.Variance(),
+			alpha: self.Alpha()
+		}
+	} 
+
+	// racine cubique de x
+	//pub fn cbrt(self) -> RMesure { self.powf(RMesure::from(1.0_f32 / 3.0_f32)) }
+	pub fn cbrt(self) -> RMesure { self.powf((1.0_f32 / 3.0_f32).into()) }
+
+}
+
+
+// 2 - ce groupe de fonction est à deux variables,
+// ce qui donne, pour l'équation y = f(x,y), la formule suivante:
+// U²(y) = [df(x)/dx]² * U²(x) + [df(y)/dy]² * U²(y)
+
+impl RMesure 
+{
+	pub fn log(self, base: RMesure) -> RMesure 
+	{
+		// WxMaxima
+		// kill(all);
+		// LogN(x, n) := ln(x) / ln(base);
+		// diff (LogN(x, base), x, 1); 
+		// diff (LogN(x, base), base, 1);
+
+		// df(x)/dx = 1/(ln(base)*x)
+		// df(y)/dy = -ln(x)/(base*ln(base)^2)
+		Self
+		{
+			valeur: self.Val().log(base.Val()),
+			variance: ((base.Val().ln() * self.Val()).recip().powf(2.0_f32) * self.Variance()) + ((self.Val().ln() / (base.Val() * base.Val().ln().powf(2.0_f32))).powf(2.0_f32) * base.Variance()),
+			alpha: self.Alpha()
+		}
+	}
+
+	// pub fn powi(self, puiss: i32) -> RMesure { self.powf(RMesure::from(puiss as f32)) }
+	pub fn powi(self, puiss: i32) -> RMesure { self.powf((puiss as f32).into()) }
+    
+	pub fn powf(self, puiss: RMesure) -> RMesure
+	{
+		// [df(x)/dx]² * U²(x) + [df(y)/dy]² * U²(y)
+		//
+		// d[pow(p,base)] = d[b^p]/db + d[b^p]/dp
+		//
+		// d[b^p]/db = b^(p-1) * p
+		// d[b^p]/dp = b^p * ln(b)
+
+		Self
+		{
+			valeur: self.Val().powf(puiss.Val()),
+			variance: (self.Val().powf(puiss.Val() - 1.0_f32) * puiss.Val()).powf(2.0_f32) * self.Variance() + (self.Val().powf(puiss.Val()) * self.Val().ln()).powf(2.0_f32) * puiss.Variance(),
+			alpha: self.Alpha()
+		}
+	}
+
+	pub fn atan2(self, Y: RMesure) -> RMesure 
+	{
+		// atan((CMesure&) (Y / X) )
+		if self == RMesure::zero() && Y == RMesure::zero() 
+		{ RMesure::zero() }
+		else if self >= RMesure::zero()
+		{ (Y / self).atan() }
+		else if Y >= RMesure::zero()
+		{ (Y / self).atan() + RMesure::from(std::f32::consts::PI) }
+		else
+		{ (Y / self).atan() - RMesure::from(std::f32::consts::PI) }
+	}	
+
+	pub fn hypot(self, Y: RMesure) -> RMesure { (self.powi(2) + Y.powi(2)).sqrt() }
+
+}
+
+
+
+
+// 3 - ce groupe de fonction me pose problème pour déterminer
+// comment calculer l'incertitude type. Je vais certainement faire
+// un choix personnel unilatérale parfaitement arbitraire.
+
+impl RMesure 
+{
+    // Le calcul d'epsilon pour floor et ceil a posé plusieurs questions:
+	//		1) Application d'un coeff de proportionnalité newVal/oldVal ?
+	//		2) Considérer qu'une valeur seuillée possède un epsilon nul 
+	//		   car c'est une valeure certaine ?
+	//		3) Augmenter epsilon de suffisament pour conserver l'ancien IT
+	//		   dans un nouveau centré en newVal ?
+	//
+	// Résultat de mes réflexions : 
+	//		Solution 1 : problème identifier si floor ou ceil retourne 0.0 car 
+	//		cela provoque un epsilon infini => REFUSEE
+	//		Solution 2 : supprimer de façon artificielle une incertitude sur
+	//		une mesure est contraire à la philosophie de cette classe => REFUSEE
+	//		Solution 3 : c'est la moins pire, selon moi, elle offre un compromis 
+	//		acceptable entre la philosophie de cette classe et les loies math�matiques
+	//		sous jacente
+
+	pub fn ceil(self) -> RMesure 
+	{
+		Self
+		{
+			valeur: self.Val().ceil(),
+			variance: ((self.IT() + (self.Val().ceil() - self.Val()).abs()) / self.K()).powf(2.0_f32),
+			alpha: self.Alpha()
+		}
+	}
+
+	pub fn floor(self) -> RMesure 
+	{
+		Self
+		{
+			valeur: self.Val().floor(),
+			variance: ((self.IT() + (self.Val().floor() - self.Val()).abs()) / self.K()).powf(2.0_f32),
+			alpha: self.Alpha()
+		}
+	}
+		
+	pub fn max(self, Y: RMesure) -> RMesure
+	{
+		if self == Y 		{ (self + Y) / 2.0_f32 }	// cas indécidable
+		else if self < Y	{ Y                    }	// self < Y
+		else 				{ self                 }	// self > Y
+	}
+
+    pub fn min(self, Y: RMesure) -> RMesure 
+	{
+		if self == Y 		{ (self + Y) / 2.0_f32 }	// cas indécidable
+		else if self < Y	{ self                 }	// self < Y
+		else 				{ Y                    }	// self > Y
+	}
+
+	pub fn signum(self) -> RMesure { RMesure::from(self.Val().signum()) }
+
+}
+
+
+
+
+/*
+impl Float for RMesure 
+{
+	pub fn round(self)  -> RMesure { todo!() }
+    pub fn trunc(self)  -> RMesure { todo!() }
+    pub fn fract(self)  -> RMesure { todo!() }
+		
+	
+	
+	fn nan() -> Self { todo!() }
+    fn infinity() -> Self { todo!() }
+    fn neg_infinity() -> Self { todo!() }
+    fn neg_zero() -> Self { todo!() }
+
+    fn is_nan(self) -> bool { todo!() }
+    fn is_infinite(self) -> bool { todo!() }
+    fn is_finite(self) -> bool { todo!() }
+    fn is_normal(self) -> bool { todo!() }
+    fn classify(self) -> FpCategory { todo!() }
+
+	fn is_sign_positive(self) -> bool { todo!() }
+    fn is_sign_negative(self) -> bool { todo!() }
+
+	fn min_value() -> Self { todo!() }
+    fn min_positive_value() -> Self { todo!() }
+    fn max_value() -> Self { todo!() }
+
+    fn mul_add(self, _: Self, _: Self) -> Self { todo!() }
+    fn abs_sub(self, _: Self) -> Self { todo!() }
+    fn integer_decode(self) -> (u64, i16, i8) { todo!() }
+}
+*/
