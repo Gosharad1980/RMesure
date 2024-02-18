@@ -19,6 +19,9 @@ mod tests
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 3.0);
 		let resultat = (mesure.Val() == 1.0) && (mesure.Eps() == 2.0) && (mesure.Alpha() == 3.0);
+		println!("valeur = {}", mesure.Val());
+		println!("sigma = {}", mesure.Eps());
+		println!("alpha = {}", mesure.Alpha());
 		assert_eq!(resultat , true);    
     }
     #[test]
@@ -139,7 +142,7 @@ mod tests
     fn test_IT() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == 4.0;
+		let resultat = mesure.IT() == 4.0_f32; //2.0_f32 * 2.0_f32;
 		assert_eq!(resultat , true);     
     }
 
