@@ -87,6 +87,7 @@ CMesure::CMesure(double v, double it, char loi)
 		case 'H' : this->epsilon = fabs(it / sqrt(12.0)); break;
 		case 'S' : this->epsilon = fabs(it / 1.4)       ; break;
 		case 'C' : this->epsilon = fabs(it / sqrt(3.0)) ; break;
+		case 'P' : this->epsilon = v * fabs(it) / 100.0 / 2.0 ; break;
 		case 'N' : // c'est la loi par d�faut dans tout bon certificat d'�talonnage qui se respecte
 		default  : this->epsilon = fabs(it / 2.0)       ; break;
 	}

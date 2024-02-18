@@ -10,8 +10,8 @@ using namespace std;
 ///////////////////////////// Fonctions math�matiques //////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// fonctions � une variable //
-// U�(y) = [df(x)/dx]� * U�(x)
+// fonctions à une variable //
+// U²(y) = [df(x)/dx]² * U²(x)
 
 CMesure fabs (CMesure& M) 
 {

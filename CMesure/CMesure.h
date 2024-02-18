@@ -42,6 +42,7 @@ public:
 	//		3) 'S' : �volution Sinuso�dale sur it = MAX - MIN : epsilon = it / 1.4
 	//		4) 'N' : loi Normale par d�faut, K = 2            : epsilon = it / 2.0
 	//		5) 'C' : appareil de Classe +/- it                : epsilon = it / rac(3.0)
+	//  	6) 'P' : appareil de classe it = p%					: epsilon = (valeur * p / 100.0) / 2.0
 	//
 	// REM : la loi N est la loi par d�faut dans tout bon certificat d'�talonnage qui se respecte
 
