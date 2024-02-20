@@ -264,7 +264,8 @@ impl ops::AddAssign<f32> for RMesure
 {
 	fn add_assign(&mut self, f32_rhs: f32)
 	{
-		*self = self.clone() + RMesure::scalaire(f32_rhs)
+		//*self = self.clone() + RMesure::scalaire(f32_rhs)
+		*self += RMesure::scalaire(f32_rhs)
 	}
 }
 
@@ -343,7 +344,8 @@ impl ops::SubAssign<f32> for RMesure
 {
 	fn sub_assign(&mut self, f32_rhs: f32)
 	{
-		*self = self.clone() - RMesure::scalaire(f32_rhs)
+		//*self = self.clone() - RMesure::scalaire(f32_rhs)
+		*self -= RMesure::scalaire(f32_rhs)
 	}
 }
 
