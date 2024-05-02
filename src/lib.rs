@@ -705,7 +705,7 @@ impl RMesure
     
 	pub fn cosh(self) -> RMesure 
 	{
-		// d[acos(x)] = sinh(x)
+		// d[cosh(x)] = sinh(x)
 		Self
 		{
 			valeur: self.Val().cosh(),
