@@ -7,12 +7,12 @@
 // Ending ta_gueule_le_compilo
 
 
-use core::{f32,convert};
+use core::{f64,convert};
 use std::{ops,fmt,cmp};
 use std::cmp::Ordering;
 
-pub const RMESURE_EPS: f32 = f32::EPSILON;
-pub const RMESURE_MAX: f32 = 9223371500000000000.0_f32; //f32::MAX.sqrt()/2.0;
+pub const RMESURE_EPS: f64 = f64::EPSILON;
+pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
 
 #[cfg_attr(
@@ -27,9 +27,9 @@ pub const RMESURE_MAX: f32 = 9223371500000000000.0_f32; //f32::MAX.sqrt()/2.0;
 )]
 pub struct RMesure
 {
-	valeur: f32,
-	variance: f32,
-    alpha: f32,
+	valeur: f64,
+	variance: f64,
+    alpha: f64,
 }
 
 /*
@@ -52,9 +52,9 @@ impl Clone for RMesure
 */
 
 
-impl convert::From<f32> for RMesure 
+impl convert::From<f64> for RMesure 
 {
-    fn from(scalaire: f32) -> RMesure
+    fn from(scalaire: f64) -> RMesure
 	{
 		RMesure::scalaire(scalaire)
     }
@@ -67,11 +67,11 @@ impl convert::From<&str> for RMesure
 {
 	fn from(msg: &str) -> Self
 	{
-		let valeur_loc: f32;
-		let epsilon_loc: f32;
-		let alpha_loc: f32;
+		let valeur_loc: f64;
+		let epsilon_loc: f64;
+		let alpha_loc: f64;
 
-		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f32} +/- {f32} | {f32}%)").unwrap();
+		(valeur_loc, epsilon_loc, alpha_loc) = sscanf::sscanf!(msg, "({f64} +/- {f64} | {f64}%)").unwrap();
 
 		Self 
 		{
@@ -98,9 +98,9 @@ impl Default for RMesure { fn default() -> RMesure { RMesure::zero() } }
 
 impl RMesure 
 {
-    pub fn new(valeur: f32, sigma: f32, alpha: f32) -> RMesure 	{ Self { valeur,      variance:       sigma.powf(2.0_f32), alpha        } }
-	pub fn zero() -> RMesure 									{ Self { valeur: 0.0, variance: RMESURE_EPS.powf(2.0_f32), alpha: 95.45 } }
-	pub fn scalaire(valeur: f32) -> RMesure						{ Self { valeur,      variance: RMESURE_EPS.powf(2.0_f32), alpha: 95.45 } }
+    pub fn new(valeur: f64, sigma: f64, alpha: f64) -> RMesure 	{ Self { valeur,      variance:       sigma.powf(2.0_f64), alpha        } }
+	pub fn zero() -> RMesure 									{ Self { valeur: 0.0, variance: RMESURE_EPS.powf(2.0_f64), alpha: 95.45 } }
+	pub fn scalaire(valeur: f64) -> RMesure						{ Self { valeur,      variance: RMESURE_EPS.powf(2.0_f64), alpha: 95.45 } }
 
 	/// Dans le cadre de mesures effectuées dans des conditions bien identifiées,
 	/// il est possible d'estimer l'incertitude type directement à partir de
@@ -112,31 +112,31 @@ impl RMesure
 	///		4) 'N' : loi Normale par défaut, K = 2              : epsilon = it / 2.0
 	///		5) 'C' : appareil de classe +/- it                  : epsilon = it / rac(3.0)
 	/// 	6) 'P' : appareil de classe it = p%					: epsilon = (valeur * p / 100.0) / K_alpha(95.45)
-	pub fn loi(valeur: f32, it: f32, loi: char) -> RMesure 
+	pub fn loi(valeur: f64, it: f64, loi: char) -> RMesure 
 	{
-		let inner_epsilon: f32;
+		let inner_epsilon: f64;
 
 		match loi
 		{
-			'R' => inner_epsilon = it.abs() / 12.0_f32.sqrt(),
-			'H' => inner_epsilon = it.abs() / 12.0_f32.sqrt(),
-			'S' => inner_epsilon = it.abs() / 2.0_f32.sqrt(),
-			'C' => inner_epsilon = it.abs() / 3.0_f32.sqrt(),
-			'P' => inner_epsilon = (valeur * it.abs() / 100.0_f32) / RMesure::K_alpha(95.45_f32),
+			'R' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
+			'S' => inner_epsilon = it.abs() / 2.0_f64.sqrt(),
+			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
+			'P' => inner_epsilon = (valeur * it.abs() / 100.0_f64) / RMesure::K_alpha(95.45_f64),
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
-			'N' => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f32), 
-			_ => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f32), 
+			'N' => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f64), 
+			_ => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f64), 
 		}
 		
-		Self { valeur, variance: inner_epsilon.powf(2.0_f32), alpha: 95.45 }
+		Self { valeur, variance: inner_epsilon.powf(2.0_f64), alpha: 95.45 }
     }
 
-	fn K_alpha(alpha_loc: f32) -> f32 
+	fn K_alpha(alpha_loc: f64) -> f64 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
-		let p: [f32; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
-		let k: [f32; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
+		let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
+		let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
 
 		let mut i = 0;
 
@@ -159,18 +159,18 @@ impl RMesure
 
 impl RMesure
 {	
-	pub fn Val(&self) -> f32	  { self.valeur   }	// LA mesure en cours de traitement
-	pub fn Alpha(&self) -> f32	  { self.alpha 	  }	// Taux de confiance
-	pub fn Variance(&self) -> f32 { self.variance }
-	pub fn Eps(&self) -> f32 	  { self.variance.sqrt() }	// Incertitude type.
-	pub fn IT(&self) -> f32 	  { self.Eps() * self.K() }	// Intervalle de tolérance = Eps x K
+	pub fn Val(&self) -> f64	  { self.valeur   }	// LA mesure en cours de traitement
+	pub fn Alpha(&self) -> f64	  { self.alpha 	  }	// Taux de confiance
+	pub fn Variance(&self) -> f64 { self.variance }
+	pub fn Eps(&self) -> f64 	  { self.variance.sqrt() }	// Incertitude type.
+	pub fn IT(&self) -> f64 	  { self.Eps() * self.K() }	// Intervalle de tolérance = Eps x K
 
 	/// Retourne : (min , 1er quartile , médiane , 3e quartile , max)
 	/// Boîte à moustache :
 	///		- la boîte --> 50% --> K = 0.6745
 	///		- les moustaches --> 99.3% --> K = 2.698
 	/// https://fr.wikipedia.org/wiki/Loi_normale#Loi_normale_centr%C3%A9e_r%C3%A9duite
-	pub fn BoxPlot(&self) -> (f32,f32,f32,f32,f32) 	
+	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
 	{ 
 		(
 			self.valeur - (self.Eps() * RMesure::K_alpha(99.3)),
@@ -182,7 +182,7 @@ impl RMesure
 	}	
 
 	// Coeff d'élargissement
-	fn K(&self) -> f32 
+	fn K(&self) -> f64 
 	{
 		RMesure::K_alpha(self.alpha)
 	}
@@ -226,27 +226,27 @@ impl ops::Add<RMesure> for RMesure
     }
 }
 
-// RMesure = constante_f32 + RMesure
-// f32.add(RMesure)
-impl ops::Add<RMesure> for f32 
+// RMesure = constante_f64 + RMesure
+// f64.add(RMesure)
+impl ops::Add<RMesure> for f64 
 {
     type Output = RMesure;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: f32, RMesure_rhs: RMesure) -> RMesure 
+    fn add(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{ 
 		RMesure::scalaire(self) + RMesure_rhs
 	}
 }
 
-// RMesure = RMesure + constante_f32
-// RMesure.add(f32)
-impl ops::Add<f32> for RMesure 
+// RMesure = RMesure + constante_f64
+// RMesure.add(f64)
+impl ops::Add<f64> for RMesure 
 {
     type Output = RMesure;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: RMesure, f32_rhs: f32) -> RMesure 
+    fn add(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
-		self + RMesure::scalaire(f32_rhs)
+		self + RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -259,12 +259,12 @@ impl ops::AddAssign<RMesure> for RMesure
 	}
 }
 
-// RMesure += constante_f32
-impl ops::AddAssign<f32> for RMesure
+// RMesure += constante_f64
+impl ops::AddAssign<f64> for RMesure
 {
-	fn add_assign(&mut self, f32_rhs: f32)
+	fn add_assign(&mut self, f64_rhs: f64)
 	{
-		*self = self.clone() + RMesure::scalaire(f32_rhs)
+		*self = self.clone() + RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -283,7 +283,7 @@ impl ops::Neg for RMesure
 	type Output = RMesure;
 	fn neg(self) -> RMesure
 	{
-		RMesure::new(-1.0_f32 * self.Val(), self.Eps(), self.Alpha())
+		RMesure::new(-1.0_f64 * self.Val(), self.Eps(), self.Alpha())
 	}
 }
 
@@ -305,27 +305,27 @@ impl ops::Sub<RMesure> for RMesure
     }
 }
 
-// RMesure = constante_f32 - RMesure
-// f32.sub(RMesure)
-impl ops::Sub<RMesure> for f32 
+// RMesure = constante_f64 - RMesure
+// f64.sub(RMesure)
+impl ops::Sub<RMesure> for f64 
 {
     type Output = RMesure;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: f32, RMesure_rhs: RMesure) -> RMesure 
+    fn sub(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) - RMesure_rhs
 	}
 }
 
-// RMesure = RMesure - constante_f32
-// RMesure.sub(f32)
-impl ops::Sub<f32> for RMesure 
+// RMesure = RMesure - constante_f64
+// RMesure.sub(f64)
+impl ops::Sub<f64> for RMesure 
 {
     type Output = RMesure;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: RMesure, f32_rhs: f32) -> RMesure 
+    fn sub(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
-		self - RMesure::scalaire(f32_rhs)
+		self - RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -338,12 +338,12 @@ impl ops::SubAssign<RMesure> for RMesure
 	}
 }
 
-// RMesure -= constante_f32
-impl ops::SubAssign<f32> for RMesure
+// RMesure -= constante_f64
+impl ops::SubAssign<f64> for RMesure
 {
-	fn sub_assign(&mut self, f32_rhs: f32)
+	fn sub_assign(&mut self, f64_rhs: f64)
 	{
-		*self = self.clone() - RMesure::scalaire(f32_rhs)
+		*self = self.clone() - RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -367,33 +367,33 @@ impl ops::Mul<RMesure> for RMesure
 		Self
 		{
 			valeur: self.Val() * RMesure_rhs.Val(),
-			variance: (self.Val().powf(2.0_f32) * RMesure_rhs.Variance()) + (self.Variance() * RMesure_rhs.Val().powf(2.0_f32)),
+			variance: (self.Val().powf(2.0_f64) * RMesure_rhs.Variance()) + (self.Variance() * RMesure_rhs.Val().powf(2.0_f64)),
 			alpha: self.Alpha().max(RMesure_rhs.Alpha())
 		}
     }
 }
 
-// RMesure = constante_f32 * RMesure
-// f32.mul(RMesure)
-impl ops::Mul<RMesure> for f32 
+// RMesure = constante_f64 * RMesure
+// f64.mul(RMesure)
+impl ops::Mul<RMesure> for f64 
 {
     type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: f32, RMesure_rhs: RMesure) -> RMesure 
+    fn mul(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) * RMesure_rhs
 	}
 }
 
-// RMesure = RMesure * constante_f32
-// RMesure.mul(f32)
-impl ops::Mul<f32> for RMesure 
+// RMesure = RMesure * constante_f64
+// RMesure.mul(f64)
+impl ops::Mul<f64> for RMesure 
 {
     type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: RMesure, f32_rhs: f32) -> RMesure 
+    fn mul(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
-		self * RMesure::scalaire(f32_rhs)
+		self * RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -406,12 +406,12 @@ impl ops::MulAssign<RMesure> for RMesure
 	}
 }
 
-// RMesure *= constante_f32
-impl ops::MulAssign<f32> for RMesure
+// RMesure *= constante_f64
+impl ops::MulAssign<f64> for RMesure
 {
-	fn mul_assign(&mut self, f32_rhs: f32)
+	fn mul_assign(&mut self, f64_rhs: f64)
 	{
-		*self = self.clone() * RMesure::scalaire(f32_rhs)
+		*self = self.clone() * RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -439,7 +439,7 @@ impl ops::Div<RMesure> for RMesure
 		// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
 		//		R.valeur = +/-inf si dénominateur nul
 		//		eps = +inf si dénom est nul
-		//if RMesure_rhs == RMesure::scalaire(0.0_f32)
+		//if RMesure_rhs == RMesure::scalaire(0.0_f64)
 		if RMesure_rhs == RMesure::zero()
 		{
 			Self
@@ -454,34 +454,34 @@ impl ops::Div<RMesure> for RMesure
 			Self
 			{
 				valeur: self.Val() / RMesure_rhs.Val(),
-				variance: ((self.Val().powf(2.0_f32) * RMesure_rhs.Variance()) + (RMesure_rhs.Val().powf(2.0_f32) * self.Variance())) / RMesure_rhs.Val().powf(4.0_f32),
+				variance: ((self.Val().powf(2.0_f64) * RMesure_rhs.Variance()) + (RMesure_rhs.Val().powf(2.0_f64) * self.Variance())) / RMesure_rhs.Val().powf(4.0_f64),
 				alpha: self.Alpha().max(RMesure_rhs.Alpha())
 			}
 		}
     }
 }
 
-// RMesure = constante_f32 / RMesure
-// f32.div(RMesure)
-impl ops::Div<RMesure> for f32 
+// RMesure = constante_f64 / RMesure
+// f64.div(RMesure)
+impl ops::Div<RMesure> for f64 
 {
     type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: f32, RMesure_rhs: RMesure) -> RMesure 
+    fn div(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) / RMesure_rhs
 	}
 }
 
-// RMesure = RMesure / constante_f32
-// RMesure.div(f32)
-impl ops::Div<f32> for RMesure 
+// RMesure = RMesure / constante_f64
+// RMesure.div(f64)
+impl ops::Div<f64> for RMesure 
 {
     type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: RMesure, f32_rhs: f32) -> RMesure 
+    fn div(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
-		self / RMesure::scalaire(f32_rhs)
+		self / RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -494,12 +494,12 @@ impl ops::DivAssign<RMesure> for RMesure
 	}
 }
 
-// RMesure /= constante_f32
-impl ops::DivAssign<f32> for RMesure
+// RMesure /= constante_f64
+impl ops::DivAssign<f64> for RMesure
 {
-	fn div_assign(&mut self, f32_rhs: f32)
+	fn div_assign(&mut self, f64_rhs: f64)
 	{
-		*self = self.clone() / RMesure::scalaire(f32_rhs)
+		*self = self.clone() / RMesure::scalaire(f64_rhs)
 	}
 }
 
@@ -619,7 +619,7 @@ impl RMesure
 		}
 	}
 
-	pub fn recip(self) -> RMesure { 1.0_f32 / self }
+	pub fn recip(self) -> RMesure { 1.0_f64 / self }
 
 	pub fn sin(self) -> RMesure
 	{
@@ -627,7 +627,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().sin(),
-			variance: self.Val().cos().powf(2.0_f32) * self.Variance(),
+			variance: self.Val().cos().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -639,7 +639,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().cos(),
-			variance: self.Val().sin().powf(2.0_f32) * self.Variance(), 
+			variance: self.Val().sin().powf(2.0_f64) * self.Variance(), 
 			alpha: self.Alpha()
 		}
 	}
@@ -650,7 +650,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().tan(),
-			variance: (1.0_f32 + self.Val().tan().powf(2.0_f32)).powf(2.0_f32) * self.Variance(), 
+			variance: (1.0_f64 + self.Val().tan().powf(2.0_f64)).powf(2.0_f64) * self.Variance(), 
 			alpha: self.Alpha()
 		}
 	}
@@ -663,7 +663,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().asin(),
-			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip() * self.Variance(), 
+			variance: (1.0_f64 - self.Val().powf(2.0_f64)).recip() * self.Variance(), 
 			alpha: self.Alpha()
 		}		
 	}
@@ -676,7 +676,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().acos(),
-			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip() * self.Variance(),
+			variance: (1.0_f64 - self.Val().powf(2.0_f64)).recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -687,7 +687,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().atan(),
-			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip().powf(2.0_f32) * self.Variance(),
+			variance: (1.0_f64 - self.Val().powf(2.0_f64)).recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -698,7 +698,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().sinh(),
-			variance: self.Val().cosh().powf(2.0_f32) * self.Variance(),
+			variance: self.Val().cosh().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -709,7 +709,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().cosh(),
-			variance: self.Val().sinh().powf(2.0_f32) * self.Variance(),
+			variance: self.Val().sinh().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -720,7 +720,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().tanh(),
-			variance: (1.0_f32 + self.Val().tanh().powf(2.0_f32)).powf(2.0_f32) * self.Variance(),
+			variance: (1.0_f64 + self.Val().tanh().powf(2.0_f64)).powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -731,7 +731,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().asinh(),
-			variance: (self.Val().powf(2.0_f32) + 1.0_f32).sqrt().recip().powf(2.0_f32) * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) + 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -742,7 +742,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().acosh(),
-			variance: (self.Val().powf(2.0_f32) - 1.0_f32).sqrt().recip().powf(2.0_f32) * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) - 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -753,7 +753,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().atanh(),
-			variance: (1.0_f32 - self.Val().powf(2.0_f32)).recip().powf(2.0_f32) * self.Variance(),
+			variance: (1.0_f64 - self.Val().powf(2.0_f64)).recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -767,14 +767,14 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().ln(),
-			variance: self.Val().recip().powf(2.0_f32) * self.Variance(),
+			variance: self.Val().recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
 
-    pub fn log2(self)  -> RMesure { self.log(2.0_f32.into()) }
-	pub fn log10(self) -> RMesure { self.log(10.0_f32.into()) }
-	pub fn ln_1p(self) -> RMesure { (1.0_f32 + self).ln() }
+    pub fn log2(self)  -> RMesure { self.log(2.0_f64.into()) }
+	pub fn log10(self) -> RMesure { self.log(10.0_f64.into()) }
+	pub fn ln_1p(self) -> RMesure { (1.0_f64 + self).ln() }
 
 
     pub fn exp(self) -> RMesure 
@@ -783,13 +783,13 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().exp(),
-			variance: self.Val().exp().powf(2.0_f32) * self.Variance(),
+			variance: self.Val().exp().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
     
-	pub fn exp2(self)   -> RMesure { RMesure::from(2.0_f32).powf(self) }
-    pub fn exp_m1(self) -> RMesure { self.exp() - RMesure::from(1.0_f32) }
+	pub fn exp2(self)   -> RMesure { RMesure::from(2.0_f64).powf(self) }
+    pub fn exp_m1(self) -> RMesure { self.exp() - RMesure::from(1.0_f64) }
 
 	pub fn sqrt(self) -> RMesure
 	{
@@ -797,14 +797,14 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().sqrt(),
-			variance: (2.0_f32 * self.Val().sqrt()).recip().powf(2.0_f32) * self.Variance(),
+			variance: (2.0_f64 * self.Val().sqrt()).recip().powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
 
 	// racine cubique de x
-	//pub fn cbrt(self) -> RMesure { self.powf(RMesure::from(1.0_f32 / 3.0_f32)) }
-	pub fn cbrt(self) -> RMesure { self.powf((1.0_f32 / 3.0_f32).into()) }
+	//pub fn cbrt(self) -> RMesure { self.powf(RMesure::from(1.0_f64 / 3.0_f64)) }
+	pub fn cbrt(self) -> RMesure { self.powf((1.0_f64 / 3.0_f64).into()) }
 
 }
 
@@ -828,13 +828,13 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().log(base.Val()),
-			variance: ((base.Val().ln() * self.Val()).recip().powf(2.0_f32) * self.Variance()) + ((self.Val().ln() / (base.Val() * base.Val().ln().powf(2.0_f32))).powf(2.0_f32) * base.Variance()),
+			variance: ((base.Val().ln() * self.Val()).recip().powf(2.0_f64) * self.Variance()) + ((self.Val().ln() / (base.Val() * base.Val().ln().powf(2.0_f64))).powf(2.0_f64) * base.Variance()),
 			alpha: self.Alpha()
 		}
 	}
 
-	// pub fn powi(self, puiss: i32) -> RMesure { self.powf(RMesure::from(puiss as f32)) }
-	pub fn powi(self, puiss: i32) -> RMesure { self.powf((puiss as f32).into()) }
+	// pub fn powi(self, puiss: i32) -> RMesure { self.powf(RMesure::from(puiss as f64)) }
+	pub fn powi(self, puiss: i32) -> RMesure { self.powf((puiss as f64).into()) }
     
 	pub fn powf(self, puiss: RMesure) -> RMesure
 	{
@@ -848,7 +848,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().powf(puiss.Val()),
-			variance: (self.Val().powf(puiss.Val() - 1.0_f32) * puiss.Val()).powf(2.0_f32) * self.Variance() + (self.Val().powf(puiss.Val()) * self.Val().ln()).powf(2.0_f32) * puiss.Variance(),
+			variance: (self.Val().powf(puiss.Val() - 1.0_f64) * puiss.Val()).powf(2.0_f64) * self.Variance() + (self.Val().powf(puiss.Val()) * self.Val().ln()).powf(2.0_f64) * puiss.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -861,9 +861,9 @@ impl RMesure
 		else if self >= RMesure::zero()
 		{ (Y / self).atan() }
 		else if Y >= RMesure::zero()
-		{ (Y / self).atan() + RMesure::from(std::f32::consts::PI) }
+		{ (Y / self).atan() + RMesure::from(std::f64::consts::PI) }
 		else
-		{ (Y / self).atan() - RMesure::from(std::f32::consts::PI) }
+		{ (Y / self).atan() - RMesure::from(std::f64::consts::PI) }
 	}	
 
 	pub fn hypot(self, Y: RMesure) -> RMesure { (self.powi(2) + Y.powi(2)).sqrt() }
@@ -900,7 +900,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().ceil(),
-			variance: ((self.IT() + (self.Val().ceil() - self.Val()).abs()) / self.K()).powf(2.0_f32),
+			variance: ((self.IT() + (self.Val().ceil() - self.Val()).abs()) / self.K()).powf(2.0_f64),
 			alpha: self.Alpha()
 		}
 	}
@@ -910,21 +910,21 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().floor(),
-			variance: ((self.IT() + (self.Val().floor() - self.Val()).abs()) / self.K()).powf(2.0_f32),
+			variance: ((self.IT() + (self.Val().floor() - self.Val()).abs()) / self.K()).powf(2.0_f64),
 			alpha: self.Alpha()
 		}
 	}
 		
 	pub fn max(self, Y: RMesure) -> RMesure
 	{
-		if self == Y 		{ (self + Y) / 2.0_f32 }	// cas indécidable
+		if self == Y 		{ (self + Y) / 2.0_f64 }	// cas indécidable
 		else if self < Y	{ Y                    }	// self < Y
 		else 				{ self                 }	// self > Y
 	}
 
     pub fn min(self, Y: RMesure) -> RMesure 
 	{
-		if self == Y 		{ (self + Y) / 2.0_f32 }	// cas indécidable
+		if self == Y 		{ (self + Y) / 2.0_f64 }	// cas indécidable
 		else if self < Y	{ self                 }	// self < Y
 		else 				{ Y                    }	// self > Y
 	}

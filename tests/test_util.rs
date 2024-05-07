@@ -53,19 +53,19 @@ mod tests
 	{
 		print!("Loi R -> ");
 		let U: RMesure = RMesure::loi(1.0, 0.01, 'R');
-		let resultat = (U.Val() == 1.0) && (U.Eps() == (0.01_f32/12.0_f32.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 1.0) && (U.Eps() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("done");
 
 		print!("Loi H -> ");
 		let U: RMesure = RMesure::loi(2.0, 0.01, 'H');
-		let resultat = (U.Val() == 2.0) && (U.Eps() == (0.01_f32/12.0_f32.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 2.0) && (U.Eps() == (0.01_f64/12.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("done");
 		
 		print!("Loi S -> ");
 		let U: RMesure = RMesure::loi(3.0, 0.01, 'S');
-		let resultat = (U.Val() == 3.0) && (U.Eps() == 0.01_f32/2.0_f32.sqrt()) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 3.0) && (U.Eps() == 0.01_f64/2.0_f64.sqrt()) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("done");
 
@@ -77,13 +77,13 @@ mod tests
 
 		print!("Loi C -> ");
 		let U: RMesure = RMesure::loi(5.0, 0.01, 'C');
-		let resultat = (U.Val() == 5.0) && (U.Eps() == (0.01_f32/3.0_f32.sqrt()) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 5.0) && (U.Eps() == (0.01_f64/3.0_f64.sqrt()) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("done");
 
 		print!("Loi P -> ");
 		let U: RMesure = RMesure::loi(5.0, -2.0, 'P');
-		let resultat = (U.Val() == 5.0) && (U.Eps() == (5.0_f32 * 2.0_f32 / 100.0_f32 / 2.0_f32) ) && (U.Alpha() == 95.45);
+		let resultat = (U.Val() == 5.0) && (U.Eps() == (5.0_f64 * 2.0_f64 / 100.0_f64 / 2.0_f64) ) && (U.Alpha() == 95.45);
 		assert_eq!(resultat , true); 
 		println!("done");
 
@@ -101,7 +101,7 @@ mod tests
     fn test_K_alpha() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == (2.0_f32 * mesure.Eps());
+		let resultat = mesure.IT() == (2.0_f64 * mesure.Eps());
 		assert_eq!(resultat , true);         
     }
 
@@ -142,7 +142,7 @@ mod tests
     fn test_IT() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == 4.0_f32; //2.0_f32 * 2.0_f32;
+		let resultat = mesure.IT() == 4.0_f64; //2.0_f64 * 2.0_f64;
 		assert_eq!(resultat , true);     
     }
 
@@ -150,7 +150,7 @@ mod tests
     fn test_K() 
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
-		let resultat = mesure.IT() == (2.0_f32 * mesure.Eps());
+		let resultat = mesure.IT() == (2.0_f64 * mesure.Eps());
 		assert_eq!(resultat , true);     
     }
 
