@@ -563,8 +563,11 @@ impl cmp::PartialOrd<RMesure> for RMesure
 	{
 		let D: RMesure = self.clone() - RMesure_rhs.clone();
 
+		// écart insignifiant vis-à-vis de sa propre incertitude
 		if D.Val().abs() <= D.IT() { Some(Ordering::Equal)   }
+		// écart en dessous de l'IT
 		else if D.Val() < -D.IT()  { Some(Ordering::Less)    }
+		// écart au dessus de l'IT
 		else                       { Some(Ordering::Greater) }
 	}
 }
@@ -670,7 +673,7 @@ impl RMesure
 
     pub fn acos(self) -> RMesure 
 	{ 	
-		// d[acos(x)] = -1 / rac(1 - x²) 
+		// d[acos(x)] = -1 / sqrt(1 - x²) 
 		// df² = (-1)² / sqrt(1 - x²)²
 		// df² = 1 / (1 - x²)
 		Self
@@ -728,10 +731,13 @@ impl RMesure
 	pub fn asinh(self) -> RMesure 
 	{
 		// d[asinh(x)] = 1 / sqrt(x² + 1)
+		// df² = 1² / sqrt(x² + 1)²
+		// df² = 1 / (x² + 1)
 		Self
 		{
 			valeur: self.Val().asinh(),
-			variance: (self.Val().powf(2.0_f64) + 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
+			//variance: (self.Val().powf(2.0_f64) + 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) + 1.0_f64).recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -739,10 +745,13 @@ impl RMesure
     pub fn acosh(self) -> RMesure 
 	{
 		// d[acosh(x)] = 1 / sqrt(x² - 1)
+		// df² = 1² / sqrt(x² - 1)²
+		// df² = 1 / (x² - 1)
 		Self
 		{
 			valeur: self.Val().acosh(),
-			variance: (self.Val().powf(2.0_f64) - 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
+			//variance: (self.Val().powf(2.0_f64) - 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) - 1.0_f64).recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -794,10 +803,13 @@ impl RMesure
 	pub fn sqrt(self) -> RMesure
 	{
 		// d[rac(x)] = 1 / (2 * rac(x))
+		// df² = 1² / (2 * rac(x))²
+		// df² = 1 / (4 * |x|)
 		Self
 		{
 			valeur: self.Val().sqrt(),
-			variance: (2.0_f64 * self.Val().sqrt()).recip().powf(2.0_f64) * self.Variance(),
+			//variance: (2.0_f64 * self.Val().sqrt()).recip().powf(2.0_f64) * self.Variance(),
+			variance: (4.0_f64 * self.Val().abs()).recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
@@ -887,12 +899,12 @@ impl RMesure
 	//		   dans un nouveau centré en newVal ?
 	//
 	// Résultat de mes réflexions : 
-	//		Solution 1 : problème identifier si floor ou ceil retourne 0.0 car 
+	//		Solution 1 : problème identifé si floor ou ceil retourne 0.0 car 
 	//		cela provoque un epsilon infini => REFUSEE
 	//		Solution 2 : supprimer de façon artificielle une incertitude sur
 	//		une mesure est contraire à la philosophie de cette classe => REFUSEE
 	//		Solution 3 : c'est la moins pire, selon moi, elle offre un compromis 
-	//		acceptable entre la philosophie de cette classe et les loies math�matiques
+	//		acceptable entre la philosophie de cette classe et les loies mathématiques
 	//		sous jacente
 
 	pub fn ceil(self) -> RMesure 
