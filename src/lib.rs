@@ -946,8 +946,6 @@ impl RMesure
 }
 
 
-
-
 /*
 impl Float for RMesure 
 {

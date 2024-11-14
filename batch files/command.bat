@@ -1,1 +1,1 @@
-cargo test --tests
+ cargo test --tests --no-fail-fast
