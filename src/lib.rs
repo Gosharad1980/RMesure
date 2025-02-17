@@ -16,48 +16,30 @@ pub const RMESURE_MAX: f64 = 9223371500000000000.0_f64; //f32::MAX.sqrt()/2.0;
 
 
 #[cfg_attr(
-    all(not(feature = "MagicEverywhere")),
-    derive(Debug, Clone)
+	all(not(feature = "MagicEverywhere")),
+	derive(Debug, Clone)
 )]
 
 
 #[cfg_attr(
-    all(feature = "MagicEverywhere"),
-    derive(Debug, Clone, Copy)
+	all(feature = "MagicEverywhere"),
+	derive(Debug, Clone, Copy)
 )]
 pub struct RMesure
 {
 	valeur: f64,
 	variance: f64,
-    alpha: f64,
+	alpha: f64,
 }
 
-/*
-#[cfg(not(feature = "MagicEverywhere"))]
-impl Drop for RMesure { fn drop(&mut self) { } }
-
-#[cfg(not(feature = "MagicEverywhere"))]
-impl Clone for RMesure 
-{
-	fn clone(&self) -> RMesure
-	{
-		RMesure 
-		{ 
-			valeur: self.valeur, 
-			epsilon: self.epsilon, 
-			alpha: self.alpha 
-		}
-    }
-}
-*/
 
 
 impl convert::From<f64> for RMesure 
 {
-    fn from(scalaire: f64) -> RMesure
+	fn from(scalaire: f64) -> RMesure
 	{
 		RMesure::scalaire(scalaire)
-    }
+	}
 }
 
 
@@ -87,10 +69,10 @@ impl convert::From<&str> for RMesure
 /// (valeur +/- IT() | alpha%)
 impl fmt::Display for RMesure 
 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
 	{
-        write!(f, "({} +/- {} | {}%)", self.Val(), self.IT(), self.Alpha())
-    }
+		write!(f, "({} +/- {} | {}%)", self.Val(), self.IT(), self.Alpha())
+	}
 }
 
 
@@ -98,7 +80,7 @@ impl Default for RMesure { fn default() -> RMesure { RMesure::zero() } }
 
 impl RMesure 
 {
-    pub fn new(valeur: f64, sigma: f64, alpha: f64) -> RMesure 	{ Self { valeur,      variance:       sigma.powf(2.0_f64), alpha        } }
+	pub fn new(valeur: f64, sigma: f64, alpha: f64) -> RMesure 	{ Self { valeur,      variance:       sigma.powf(2.0_f64), alpha        } }
 	pub fn zero() -> RMesure 									{ Self { valeur: 0.0, variance: RMESURE_EPS.powf(2.0_f64), alpha: 95.45 } }
 	pub fn scalaire(valeur: f64) -> RMesure						{ Self { valeur,      variance: RMESURE_EPS.powf(2.0_f64), alpha: 95.45 } }
 
@@ -111,7 +93,7 @@ impl RMesure
 	///		3) 'S' : évolution Sinusoïdale sur it = MAXI - MINI : epsilon = it / 1.4
 	///		4) 'N' : loi Normale par défaut, K = 2              : epsilon = it / 2.0
 	///		5) 'C' : appareil de classe +/- it                  : epsilon = it / rac(3.0)
-	/// 	6) 'P' : appareil de classe it = p%					: epsilon = (valeur * p / 100.0) / K_alpha(95.45)
+	/// 	6) 'P' : appareil de classe it = p%                 : epsilon = (valeur * p / 100.0) / K_alpha(95.45)
 	pub fn loi(valeur: f64, it: f64, loi: char) -> RMesure 
 	{
 		let inner_epsilon: f64;
@@ -129,7 +111,7 @@ impl RMesure
 		}
 		
 		Self { valeur, variance: inner_epsilon.powf(2.0_f64), alpha: 95.45 }
-    }
+	}
 
 	fn K_alpha(alpha_loc: f64) -> f64 
 	{
@@ -212,10 +194,10 @@ impl RMesure
 
 impl ops::Add<RMesure> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+	fn add(self: RMesure, RMesure_rhs: RMesure) -> RMesure
 	{
 		Self
 		{
@@ -230,9 +212,9 @@ impl ops::Add<RMesure> for RMesure
 // f64.add(RMesure)
 impl ops::Add<RMesure> for f64 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: f64, RMesure_rhs: RMesure) -> RMesure 
+	fn add(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{ 
 		RMesure::scalaire(self) + RMesure_rhs
 	}
@@ -242,9 +224,9 @@ impl ops::Add<RMesure> for f64
 // RMesure.add(f64)
 impl ops::Add<f64> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U²(self + M) = U²(self) + U²(M)
-    fn add(self: RMesure, f64_rhs: f64) -> RMesure 
+	fn add(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
 		self + RMesure::scalaire(f64_rhs)
 	}
@@ -254,7 +236,7 @@ impl ops::Add<f64> for RMesure
 impl ops::AddAssign<RMesure> for RMesure
 {
 	fn add_assign(&mut self, RMesure_rhs: RMesure)
-	{ 
+	{
 		*self = self.clone() + RMesure_rhs
 	}
 }
@@ -292,9 +274,9 @@ impl ops::Neg for RMesure
 
 impl ops::Sub<RMesure> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+	fn sub(self: RMesure, RMesure_rhs: RMesure) -> RMesure
 	{
 		Self
 		{
@@ -309,9 +291,9 @@ impl ops::Sub<RMesure> for RMesure
 // f64.sub(RMesure)
 impl ops::Sub<RMesure> for f64 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: f64, RMesure_rhs: RMesure) -> RMesure 
+	fn sub(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) - RMesure_rhs
 	}
@@ -321,9 +303,9 @@ impl ops::Sub<RMesure> for f64
 // RMesure.sub(f64)
 impl ops::Sub<f64> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U²(self - M) = U²(self) + U²(M)
-    fn sub(self: RMesure, f64_rhs: f64) -> RMesure 
+	fn sub(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
 		self - RMesure::scalaire(f64_rhs)
 	}
@@ -359,10 +341,10 @@ impl ops::SubAssign<f64> for RMesure
 
 impl ops::Mul<RMesure> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
 
-    fn mul(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+	fn mul(self: RMesure, RMesure_rhs: RMesure) -> RMesure
 	{
 		Self
 		{
@@ -370,16 +352,16 @@ impl ops::Mul<RMesure> for RMesure
 			variance: (self.Val().powf(2.0_f64) * RMesure_rhs.Variance()) + (self.Variance() * RMesure_rhs.Val().powf(2.0_f64)),
 			alpha: self.Alpha().max(RMesure_rhs.Alpha())
 		}
-    }
+	}
 }
 
 // RMesure = constante_f64 * RMesure
 // f64.mul(RMesure)
 impl ops::Mul<RMesure> for f64 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: f64, RMesure_rhs: RMesure) -> RMesure 
+	fn mul(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) * RMesure_rhs
 	}
@@ -389,9 +371,9 @@ impl ops::Mul<RMesure> for f64
 // RMesure.mul(f64)
 impl ops::Mul<f64> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²))
-    fn mul(self: RMesure, f64_rhs: f64) -> RMesure 
+	fn mul(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
 		self * RMesure::scalaire(f64_rhs)
 	}
@@ -427,13 +409,13 @@ impl ops::MulAssign<f64> for RMesure
 
 impl ops::Div<RMesure> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
 	/// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
 	///		R.valeur = +/-inf si dénominateur nul
 	///		eps = +inf si dénom est nul
 
-    fn div(self: RMesure, RMesure_rhs: RMesure) -> RMesure
+	fn div(self: RMesure, RMesure_rhs: RMesure) -> RMesure
 	{
 		// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
 		// CAS DE LA DIVISION DE/PAR ZERO !!! (traite l'infinie comme une valeur)
@@ -458,16 +440,16 @@ impl ops::Div<RMesure> for RMesure
 				alpha: self.Alpha().max(RMesure_rhs.Alpha())
 			}
 		}
-    }
+	}
 }
 
 // RMesure = constante_f64 / RMesure
 // f64.div(RMesure)
 impl ops::Div<RMesure> for f64 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: f64, RMesure_rhs: RMesure) -> RMesure 
+	fn div(self: f64, RMesure_rhs: RMesure) -> RMesure 
 	{
 		RMesure::scalaire(self) / RMesure_rhs
 	}
@@ -477,9 +459,9 @@ impl ops::Div<RMesure> for f64
 // RMesure.div(f64)
 impl ops::Div<f64> for RMesure 
 {
-    type Output = RMesure;
+	type Output = RMesure;
 	/// U(R) = sqrt((U(this)² * M²) + (this² * U(M)²)) * (1 / M²) 
-    fn div(self: RMesure, f64_rhs: f64) -> RMesure 
+	fn div(self: RMesure, f64_rhs: f64) -> RMesure 
 	{
 		self / RMesure::scalaire(f64_rhs)
 	}
@@ -538,12 +520,12 @@ impl ops::DivAssign<f64> for RMesure
 //                                                                             //
 /////////////////////////////////////////////////////////////////////////////////
 
-//     bool operator==(const CMesure& M) const;		PartialEq eq -> partial_cmp Some(Equal)
-//     bool operator!=(const CMesure& M) const;		PartialEq ne -> !eq
-//     bool operator<=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less | Equal)
-//     bool operator>=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater | Equal)
-//     bool operator< (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less)
-//     bool operator> (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater)
+//	bool operator==(const CMesure& M) const;		PartialEq eq -> partial_cmp Some(Equal)
+//	bool operator!=(const CMesure& M) const;		PartialEq ne -> !eq
+//	bool operator<=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less | Equal)
+//	bool operator>=(const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater | Equal)
+//	bool operator< (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Less)
+//	bool operator> (const CMesure& M) const;		PartialOrd partial_cmp -> Some(Greater)
 
 
 
@@ -635,7 +617,7 @@ impl RMesure
 		}
 	}
 
-    pub fn cos(self) -> RMesure 
+	pub fn cos(self) -> RMesure 
 	{
 		// d[cos(x)] = -sin(x)
 		// df² = (-1 * sin(x) )² = sin(x)²
@@ -647,7 +629,7 @@ impl RMesure
 		}
 	}
 
-    pub fn tan(self) -> RMesure 
+	pub fn tan(self) -> RMesure 
 	{
 		// d[tan(x)] = 1 + tan²(x)
 		Self
@@ -658,7 +640,7 @@ impl RMesure
 		}
 	}
 
-    pub fn asin(self) -> RMesure 
+	pub fn asin(self) -> RMesure 
 	{
 		// d[asin(x)] = 1 / sqrt(1 - x²)
 		// df² = 1² / sqrt(1 - x²)²
@@ -671,8 +653,8 @@ impl RMesure
 		}		
 	}
 
-    pub fn acos(self) -> RMesure 
-	{ 	
+	pub fn acos(self) -> RMesure 
+	{
 		// d[acos(x)] = -1 / sqrt(1 - x²) 
 		// df² = (-1)² / sqrt(1 - x²)²
 		// df² = 1 / (1 - x²)
@@ -684,7 +666,7 @@ impl RMesure
 		}
 	}
 
-    pub fn atan(self) -> RMesure
+	pub fn atan(self) -> RMesure
 	{
 		// d[atan(x)] = 1 / (1 - x²)
 		Self
@@ -705,7 +687,7 @@ impl RMesure
 			alpha: self.Alpha()
 		}
 	} 
-    
+
 	pub fn cosh(self) -> RMesure 
 	{
 		// d[cosh(x)] = sinh(x)
@@ -717,7 +699,7 @@ impl RMesure
 		}
 	} 
 
-    pub fn tanh(self) -> RMesure 
+	pub fn tanh(self) -> RMesure 
 	{
 		// d[tanh(x)] = 1 + tanh²(x)
 		Self
@@ -742,7 +724,7 @@ impl RMesure
 		}
 	}
 
-    pub fn acosh(self) -> RMesure 
+	pub fn acosh(self) -> RMesure 
 	{
 		// d[acosh(x)] = 1 / sqrt(x² - 1)
 		// df² = 1² / sqrt(x² - 1)²
@@ -756,7 +738,7 @@ impl RMesure
 		}
 	} 
 
-    pub fn atanh(self) -> RMesure 
+	pub fn atanh(self) -> RMesure 
 	{
 		// d[atanh(x)] = 1 / (1 - x²)
 		Self
@@ -781,12 +763,12 @@ impl RMesure
 		}
 	} 
 
-    pub fn log2(self)  -> RMesure { self.log(2.0_f64.into()) }
+	pub fn log2(self)  -> RMesure { self.log(2.0_f64.into()) }
 	pub fn log10(self) -> RMesure { self.log(10.0_f64.into()) }
 	pub fn ln_1p(self) -> RMesure { (1.0_f64 + self).ln() }
 
 
-    pub fn exp(self) -> RMesure 
+	pub fn exp(self) -> RMesure 
 	{
 		// d[exp(x)] = exp(x)
 		Self
@@ -796,9 +778,9 @@ impl RMesure
 			alpha: self.Alpha()
 		}
 	} 
-    
+
 	pub fn exp2(self)   -> RMesure { RMesure::from(2.0_f64).powf(self) }
-    pub fn exp_m1(self) -> RMesure { self.exp() - RMesure::from(1.0_f64) }
+	pub fn exp_m1(self) -> RMesure { self.exp() - RMesure::from(1.0_f64) }
 
 	pub fn sqrt(self) -> RMesure
 	{
@@ -847,7 +829,7 @@ impl RMesure
 
 	// pub fn powi(self, puiss: i32) -> RMesure { self.powf(RMesure::from(puiss as f64)) }
 	pub fn powi(self, puiss: i32) -> RMesure { self.powf((puiss as f64).into()) }
-    
+
 	pub fn powf(self, puiss: RMesure) -> RMesure
 	{
 		// [df(x)/dx]² * U²(x) + [df(y)/dy]² * U²(y)
@@ -891,7 +873,7 @@ impl RMesure
 
 impl RMesure 
 {
-    // Le calcul d'epsilon pour floor et ceil a posé plusieurs questions:
+	// Le calcul d'epsilon pour floor et ceil a posé plusieurs questions:
 	//		1) Application d'un coeff de proportionnalité newVal/oldVal ?
 	//		2) Considérer qu'une valeur seuillée possède un epsilon nul 
 	//		   car c'est une valeure certaine ?
@@ -950,31 +932,30 @@ impl RMesure
 impl Float for RMesure 
 {
 	pub fn round(self)  -> RMesure { todo!() }
-    pub fn trunc(self)  -> RMesure { todo!() }
-    pub fn fract(self)  -> RMesure { todo!() }
-		
-	
-	
-	fn nan() -> Self { todo!() }
-    fn infinity() -> Self { todo!() }
-    fn neg_infinity() -> Self { todo!() }
-    fn neg_zero() -> Self { todo!() }
+	pub fn trunc(self)  -> RMesure { todo!() }
+	pub fn fract(self)  -> RMesure { todo!() }
 
-    fn is_nan(self) -> bool { todo!() }
-    fn is_infinite(self) -> bool { todo!() }
-    fn is_finite(self) -> bool { todo!() }
-    fn is_normal(self) -> bool { todo!() }
-    fn classify(self) -> FpCategory { todo!() }
+
+	fn nan() -> Self { todo!() }
+	fn infinity() -> Self { todo!() }
+	fn neg_infinity() -> Self { todo!() }
+	fn neg_zero() -> Self { todo!() }
+
+	fn is_nan(self) -> bool { todo!() }
+	fn is_infinite(self) -> bool { todo!() }
+	fn is_finite(self) -> bool { todo!() }
+	fn is_normal(self) -> bool { todo!() }
+	fn classify(self) -> FpCategory { todo!() }
 
 	fn is_sign_positive(self) -> bool { todo!() }
-    fn is_sign_negative(self) -> bool { todo!() }
+	fn is_sign_negative(self) -> bool { todo!() }
 
 	fn min_value() -> Self { todo!() }
-    fn min_positive_value() -> Self { todo!() }
-    fn max_value() -> Self { todo!() }
+	fn min_positive_value() -> Self { todo!() }
+	fn max_value() -> Self { todo!() }
 
-    fn mul_add(self, _: Self, _: Self) -> Self { todo!() }
-    fn abs_sub(self, _: Self) -> Self { todo!() }
-    fn integer_decode(self) -> (u64, i16, i8) { todo!() }
+	fn mul_add(self, _: Self, _: Self) -> Self { todo!() }
+	fn abs_sub(self, _: Self) -> Self { todo!() }
+	fn integer_decode(self) -> (u64, i16, i8) { todo!() }
 }
 */
