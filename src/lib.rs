@@ -104,37 +104,55 @@ impl RMesure
 			'H' => inner_epsilon = it.abs() / 12.0_f64.sqrt(),
 			'S' => inner_epsilon = it.abs() / 2.0_f64.sqrt(),
 			'C' => inner_epsilon = it.abs() / 3.0_f64.sqrt(),
-			'P' => inner_epsilon = (valeur * it.abs() / 100.0_f64) / RMesure::K_alpha(95.45_f64),
+			'P' => inner_epsilon = (valeur * it.abs() / 100.0_f64) / RMesure::Fx(95.45_f64, false),
 			// c'est la loi par défaut dans tout bon certificat d'étalonnage qui se respecte
-			'N' => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f64), 
-			_ => inner_epsilon = it.abs() / RMesure::K_alpha(95.45_f64), 
+			'N' => inner_epsilon = it.abs() / RMesure::Fx(95.45_f64, false), 
+			_ => inner_epsilon = it.abs() / RMesure::Fx(95.45_f64, false), 
 		}
 		
 		Self { valeur, variance: inner_epsilon.powf(2.0_f64), alpha: 95.45 }
 	}
 
-	fn K_alpha(alpha_loc: f64) -> f64 
+	fn Fx(input_loc: f64, inv: bool) -> f64 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
-		let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
-		let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
+		// let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
+		// let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
+
+		let fx:[[f64;13];2] = [[99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000], //p
+							   [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000]]; //k
 
 		let mut i = 0;
+		
+		let x;
+		let y;
+
+		if inv==false
+		{
+			x = 0;
+			y = 1;
+		}
+		else
+		{
+			x = 1;
+			y = 0;	
+		}
+
 
 		// Recherche du cadran dans lequel on se situe
-		for j in 1..p.len()
+		for j in 1..fx[x].len()
 		{
-			if alpha_loc >= p[j] 
+			if input_loc >= fx[x][j] 
 			{ i = j; break; }
 		}
 
 		// Interpolation de la valeur du coefficient d'élargissement
-		let a = (k[i] - k[i-1]) / (p[i] - p[i-1]);
-		let b = k[i-1] - (a * p[i-1]);
+		let a = (fx[y][i] - fx[y][i-1]) / (fx[x][i] - fx[x][i-1]);
+		let b = fx[y][i-1] - (a * fx[x][i-1]);
 
 		//return a * alpha_loc + b
-		a * alpha_loc + b
+		a * input_loc + b
 	}
 	
 }
@@ -155,18 +173,23 @@ impl RMesure
 	pub fn BoxPlot(&self) -> (f64,f64,f64,f64,f64) 	
 	{ 
 		(
-			self.valeur - (self.Eps() * RMesure::K_alpha(99.3)),
-			self.valeur - (self.Eps() * RMesure::K_alpha(50.0)),
+			self.valeur - (self.Eps() * RMesure::Fx(99.3, false)),
+			self.valeur - (self.Eps() * RMesure::Fx(50.0, false)),
 			self.valeur,
-			self.valeur + (self.Eps() * RMesure::K_alpha(50.0)),
-			self.valeur + (self.Eps() * RMesure::K_alpha(99.3)),
+			self.valeur + (self.Eps() * RMesure::Fx(50.0, false)),
+			self.valeur + (self.Eps() * RMesure::Fx(99.3, false)),
 		)
 	}	
 
 	// Coeff d'élargissement
 	fn K(&self) -> f64 
 	{
-		RMesure::K_alpha(self.alpha)
+		RMesure::Fx(self.alpha, false)
+	}
+
+	fn pValue(&self) -> f64 
+	{
+		(100.0 - RMesure::Fx( self.Val().abs() / self.Eps() , true)) / 2.0
 	}
 }
 
