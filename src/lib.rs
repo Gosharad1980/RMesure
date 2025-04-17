@@ -187,7 +187,7 @@ impl RMesure
 		RMesure::Fx(self.alpha, false)
 	}
 
-	fn pValue(&self) -> f64 
+	pub fn pValue(&self) -> f64 
 	{
 		(100.0 - RMesure::Fx( self.Val().abs() / self.Eps() , true)) / 2.0
 	}
