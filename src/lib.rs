@@ -113,13 +113,10 @@ impl RMesure
 		Self { valeur, variance: inner_epsilon.powf(2.0_f64), alpha: 95.45 }
 	}
 
-	pub fn Fx(input_loc: f64, inv: bool) -> f64 
+	fn Fx(input_loc: f64, inv: bool) -> f64 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
-		// let p: [f64; 13] = [99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000];
-		// let k: [f64; 13] = [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000];
-
 		let fx:[[f64;13];2] = [[99.95 , 99.73 , 99.30, 99.00 , 98.76 , 95.45 , 95.00 , 90.00 , 86.64 , 68.27 , 50.000 , 38.29 , 0.000], //p
 							   [3.500 , 3.000 , 2.698, 2.576 , 2.500 , 2.000 , 1.960 , 1.645 , 1.500 , 1.000 , 0.6745 , 0.500 , 0.000]]; //k
 
