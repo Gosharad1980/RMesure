@@ -113,7 +113,7 @@ impl RMesure
 		Self { valeur, variance: inner_epsilon.powf(2.0_f64), alpha: 95.45 }
 	}
 
-	fn Fx(input_loc: f64, inv: bool) -> f64 
+	pub fn Fx(input_loc: f64, inv: bool) -> f64 
 	{
 		// Calcul par interpolation du coeff d'élargissement à l'aide
 		// des valeurs décrites dans la norme "NF ENV 13005"
@@ -128,7 +128,7 @@ impl RMesure
 		let x;
 		let y;
 
-		if inv==false
+		if inv == false
 		{
 			x = 0;
 			y = 1;
@@ -138,7 +138,6 @@ impl RMesure
 			x = 1;
 			y = 0;	
 		}
-
 
 		// Recherche du cadran dans lequel on se situe
 		for j in 1..fx[x].len()
@@ -189,7 +188,7 @@ impl RMesure
 
 	pub fn pValue(&self) -> f64 
 	{
-		(100.0 - RMesure::Fx( self.Val().abs() / self.Eps() , true)) / 2.0
+		(100.0_f64 - RMesure::Fx( self.Val().abs() / self.Eps() , true)) / 2.0_f64
 	}
 }
 
