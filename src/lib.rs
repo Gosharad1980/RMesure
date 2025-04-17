@@ -139,19 +139,30 @@ impl RMesure
 			y = 0;	
 		}
 
-		// Recherche du cadran dans lequel on se situe
-		for j in 1..fx[x].len()
+		if input_loc >= fx[x][0]
 		{
-			if input_loc >= fx[x][j] 
-			{ i = j; break; }
+			return fx[y][0];
 		}
+		else if input_loc <= fx[x][fx[x].len()-1]
+		{
+			return fx[y][12];
+		}
+		else
+		{
+			// Recherche du cadran dans lequel on se situe
+			for j in 1..fx[x].len()
+			{
+				if input_loc >= fx[x][j] 
+				{ i = j; break; }
+			}
 
-		// Interpolation de la valeur du coefficient d'élargissement
-		let a = (fx[y][i] - fx[y][i-1]) / (fx[x][i] - fx[x][i-1]);
-		let b = fx[y][i-1] - (a * fx[x][i-1]);
+			// Interpolation de la valeur du coefficient d'élargissement
+			let a = (fx[y][i] - fx[y][i-1]) / (fx[x][i] - fx[x][i-1]);
+			let b = fx[y][i-1] - (a * fx[x][i-1]);
 
-		//return a * alpha_loc + b
-		a * input_loc + b
+			//return a * alpha_loc + b
+			return a * input_loc + b
+		}
 	}
 	
 }
