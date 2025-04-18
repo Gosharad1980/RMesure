@@ -125,32 +125,17 @@ impl RMesure
 		let x;
 		let y;
 
-		if inv == false
-		{
-			x = 0;
-			y = 1;
-		}
-		else
-		{
-			x = 1;
-			y = 0;	
-		}
+		if inv == false { x = 0; y = 1; }
+		else			{ x = 1; y = 0; }
 
-		if input_loc >= fx[x][0]
-		{
-			return fx[y][0];
-		}
-		else if input_loc <= fx[x][fx[x].len()-1]
-		{
-			return fx[y][12];
-		}
+		if input_loc >= fx[x][0]					{ return fx[y][0];  		   }
+		else if input_loc <= fx[x][fx[x].len()-1]	{ return fx[y][fx[y].len()-1]; }
 		else
 		{
 			// Recherche du cadran dans lequel on se situe
 			for j in 1..fx[x].len()
 			{
-				if input_loc >= fx[x][j] 
-				{ i = j; break; }
+				if input_loc >= fx[x][j] { i = j; break; } 
 			}
 
 			// Interpolation de la valeur du coefficient d'élargissement
