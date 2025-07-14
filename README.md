@@ -1,5 +1,5 @@
 # RMesure
-Uncertaicies calculation Rust trait
+Uncertainties calculation Rust trait
 
 ## Variance propagation
 
