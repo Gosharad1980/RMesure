@@ -19,20 +19,20 @@ Wherre K is the number of standard deviation to take in account regarding the "N
 
 ## Comparisons and ordering
 
--> Evaluate R = A - B
--> Check where is the extented uncertaicy regarding the result
-
-
-		    -IT(A-B)      0      +IT(A-B)
--inf ------------------+----------+----------+-----------------> (A - B)
-
-	(A!=B)			(A==B)			(A!=B) 
--inf ------------------[----------+----------]------------------ +inf
-
-	(A<=B)						(A>B)
--inf ----------------------------------------]------------------ +inf
-
-	(A<B)						(A>=B) 
--inf ------------------[---------------------------------------- +inf
+	-> Evaluate R = A - B
+	-> Check where is the extented uncertaicy regarding the result
+	
+	
+			    -IT(A-B)      0      +IT(A-B)
+	-inf ------------------+----------+----------+-----------------> (A - B)
+	
+		(A!=B)			(A==B)			(A!=B) 
+	-inf ------------------[----------+----------]------------------ +inf
+	
+		(A<=B)						(A>B)
+	-inf ----------------------------------------]------------------ +inf
+	
+		(A<B)						(A>=B) 
+	-inf ------------------[---------------------------------------- +inf
 
 ---
