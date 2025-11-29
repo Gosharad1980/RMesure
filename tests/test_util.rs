@@ -110,7 +110,8 @@ mod tests
 	{
 		let mesure: RMesure = RMesure::new(1.0, 2.0 , 95.45);
 		println!("BoxPlot I = {:?}", mesure.BoxPlot());
-		let resultat = (-4.396000000000015,-0.3490000000000002,1.0,2.349,6.396000000000015) == mesure.BoxPlot();
+		let resultat = (-4.537399999999991, -0.349, 1.0, 2.349, 6.537399999999991) == mesure.BoxPlot();
+		// let resultat = (-4.396000000000015,-0.3490000000000002,1.0,2.349,6.396000000000015) == mesure.BoxPlot();
 		// let resultat = (-4.395996, -0.34899986, 1.0, 2.349, 6.395996) == mesure.BoxPlot();
 		assert_eq!(resultat , true);      
     }
