@@ -23,16 +23,16 @@ Wherre K is the number of standard deviation to take in account regarding the "N
 	-> Check where is the extented uncertaincy regarding the result
 	
 	
-			    -IT(A-B)      0      +IT(A-B)
+			    		-IT(A-B)      0      +IT(A-B)
 	-inf ------------------+----------+----------+-----------------> (A - B)
 	
-		(A!=B)			(A==B)			(A!=B) 
+					(A!=B)			(A==B)			(A!=B) 
 	-inf ------------------[----------+----------]------------------ +inf
 	
-		(A<=B)						(A>B)
+					(A<=B)						(A>B)
 	-inf ----------------------------------------]------------------ +inf
 	
-		(A<B)						(A>=B) 
+					(A<B)						(A>=B) 
 	-inf ------------------[---------------------------------------- +inf
 
 
@@ -57,3 +57,23 @@ Wherre K is the number of standard deviation to take in account regarding the "N
 | $$y = e^x $$ | $$\sigma_y^2 = \left( e^x \right)^2  \sigma_x^2$$ |
 | $$y = \sqrt x $$ | $$\sigma_y^2 = \left( \frac{1}{4\left\| x \right\|} \right)  \sigma_x^2$$ |
 | $$y = x^y$$         | $$\sigma_z^2 = \left(y.x^{y-1}\right)^2 \sigma_x^2 + \left[(1+ln(x)).x^y \right]^2 \sigma_y^2$$ |
+
+## Example of use
+```
+	fn test_incertitude_U_egal_RI()
+	{
+		let U: RMesure = 5.0_f64.into(); // 5.0 Volts
+		let R: RMesure = RMesure::loi(300.0_f64, 10.0_f64,'P'); // 300 ohm +/- 10%
+
+		let I: RMesure = U / R; // Ampères
+
+		println!("U = {U}");
+		println!("R = {R}");
+		println!("I = {I}");
+	}
+```
+### output
+
+	U = (5 +/- 0.0000000000000004440892098500626 | 95.45%)
+	R = (300 +/- 30 | 95.45%)
+	I = (0.016666666666666666 +/- 0.0016666666666666668 | 95.45%)
