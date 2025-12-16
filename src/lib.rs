@@ -729,12 +729,12 @@ impl RMesure
 	{
 		// d[asinh(x)] = 1 / sqrt(x² + 1)
 		// df² = 1² / sqrt(x² + 1)²
-		// df² = 1 / (x² + 1)
+		// df² = 1 / |(x² + 1)|
 		Self
 		{
 			valeur: self.Val().asinh(),
 			//variance: (self.Val().powf(2.0_f64) + 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
-			variance: (self.Val().powf(2.0_f64) + 1.0_f64).recip() * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) + 1.0_f64).abs().recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	}
@@ -743,12 +743,12 @@ impl RMesure
 	{
 		// d[acosh(x)] = 1 / sqrt(x² - 1)
 		// df² = 1² / sqrt(x² - 1)²
-		// df² = 1 / (x² - 1)
+		// df² = 1 / |(x² - 1)|
 		Self
 		{
 			valeur: self.Val().acosh(),
 			//variance: (self.Val().powf(2.0_f64) - 1.0_f64).sqrt().recip().powf(2.0_f64) * self.Variance(),
-			variance: (self.Val().powf(2.0_f64) - 1.0_f64).recip() * self.Variance(),
+			variance: (self.Val().powf(2.0_f64) - 1.0_f64).abs().recip() * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 
