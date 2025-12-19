@@ -773,7 +773,7 @@ impl RMesure
 		Self
 		{
 			valeur: self.Val().ln(),
-			variance: self.Val().recip().powf(2.0_f64) * self.Variance(),
+			variance: (self.Val().recip()).powf(2.0_f64) * self.Variance(),
 			alpha: self.Alpha()
 		}
 	} 

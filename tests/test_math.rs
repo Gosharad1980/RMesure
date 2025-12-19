@@ -10,7 +10,7 @@
 #[cfg(test)]
 mod tests 
 {
-    // use ::RMesure::RMESURE_EPS;
+    use ::RMesure::RMESURE_EPS;
     // Import the necessary modules
 	use RMesure::RMesure;
 
@@ -210,7 +210,6 @@ mod tests
 	#[test]
 	fn test_sin_cos()
 	{
-		
 		let (resultat_sin,resultat_cos) : (RMesure, RMesure) = RMesure::new(1.570796_f64, 0.001_f64 , 95.45_f64).sin_cos();
 
 		let resultat_sin_val = 1.570796_f64.sin();
@@ -230,7 +229,15 @@ mod tests
 	#[test]
 	fn test_ln()
 	{
-		todo!()
+		let resultat:	RMesure = RMesure::new(2.0_f64.sqrt() / 2.0_f64, 0.001_f64 , 95.45_f64).ln();
+
+		let resultat_val = (2.0_f64.sqrt() / 2.0_f64).ln();
+		let resultat_eps = ((2.0_f64.sqrt() / 2.0_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 
 	#[test]
@@ -251,7 +258,15 @@ mod tests
 	#[test]
 	fn test_exp()
 	{
-		todo!()
+		let resultat:	RMesure = RMesure::new(2.0_f64.sqrt() / 2.0_f64, 0.001_f64 , 95.45_f64).exp();
+
+		let resultat_val = (2.0_f64.sqrt() / 2.0_f64).exp();
+		let resultat_eps = ((2.0_f64.sqrt() / 2.0_f64).exp().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 	#[test]
 	fn test_exp2()
@@ -267,7 +282,15 @@ mod tests
 	#[test]
 	fn test_sqrt()
 	{
-		todo!()
+		let resultat:	RMesure = RMesure::new(2.0_f64, 0.001_f64 , 95.45_f64).sqrt();
+
+		let resultat_val = 2.0_f64.sqrt();
+		let resultat_eps = ((4.0_f64 * 2.0_f64.abs()).recip() * 0.001_f64.powf(2.0_f64)).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 	#[test]
 	fn test_cbrt()
@@ -278,7 +301,15 @@ mod tests
 	#[test]
 	fn test_log()
 	{
-		todo!()
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).log(1.618_f64.into());
+
+		let resultat_val = 0.618_f64.log(1.618_f64);
+		let resultat_eps = ((1.618_f64.ln()  *  0.618_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)) + ((0.618_f64.ln()  / ( 1.618_f64  * 1.618_f64.ln().powf(2.0_f64))).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64));
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 	#[test]
 	fn test_powi()
