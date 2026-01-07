@@ -847,12 +847,14 @@ impl RMesure
 
 	pub fn powf(self, puiss: RMesure) -> RMesure
 	{
-		// [df(x)/dx]² * U²(x) + [df(y)/dy]² * U²(y)
-		//
-		// d[pow(p,base)] = d[b^p]/db + d[b^p]/dp
+		// d[pow(base, puiss)] = d[b^p]/db + d[b^p]/dp
 		//
 		// d[b^p]/db = b^(p-1) * p
 		// d[b^p]/dp = b^p * ln(b)
+		//
+		// variance = [df(x)/dx]² * U²(x) + [df(y)/dy]² * U²(y)
+		// variance = [d[b^p]/db]² * U²(b) + [d[b^p]/dp]² * U²(p)
+		// variance = [b^(p-1) * p]² * b.Var() + [b^p * ln(b)]² * p.Var()
 
 		Self
 		{

@@ -243,18 +243,42 @@ mod tests
 	#[test]
 	fn test_log2()
 	{
-		todo!()
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).log2();
+
+		let resultat_val = 0.618_f64.log(2.0_f64);
+		let resultat_eps = (((2.0_f64.ln() * 0.618_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)) + ((0.618_f64.ln() / (2.0_f64 * 2.0_f64.ln().powf(2.0_f64))).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64))).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_log10()
 	{
-		todo!()
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).log10();
+
+		let resultat_val = 0.618_f64.log(10.0_f64);
+		let resultat_eps = (((10.0_f64.ln() * 0.618_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)) + ((0.618_f64.ln() / (10.0_f64 * 10.0_f64.ln().powf(2.0_f64))).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64))).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_ln_1p()
 	{
-		todo!()
+		let check:		RMesure = RMesure::new(1.0_f64 + (2.0_f64.sqrt() / 2.0_f64), 0.001_f64 , 95.45_f64).ln();
+		let resultat:	RMesure = RMesure::new(2.0_f64.sqrt() / 2.0_f64, 0.001_f64 , 95.45_f64).ln_1p();
+
+		let resultat = resultat.Val() == check.Val() && resultat.Eps() == check.Eps() && resultat.Alpha() == check.Alpha();
+
+		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_exp()
 	{
@@ -268,10 +292,21 @@ mod tests
 
 		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_exp2()
 	{
-		todo!()
+		// RMesure::from(2.0_f64).powf(self)
+
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).exp2();
+
+		let resultat_val = 2.0_f64.powf(0.618_f64);
+		let resultat_eps = ((2.0_f64.powf(0.618_f64 - 1.0_f64) * 0.618_f64).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64) + (2.0_f64.powf(0.618_f64) * 2.0_f64.ln()).powf(2.0_f64) * 0.001_f64.powf(2.0_f64)).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 
 	#[test]
@@ -279,6 +314,7 @@ mod tests
 	{
 		todo!()
 	}
+
 	#[test]
 	fn test_sqrt()
 	{
@@ -292,10 +328,20 @@ mod tests
 
 		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_cbrt()
 	{
-		todo!()
+		// self.powf((1.0_f64 / 3.0_f64).into())
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).cbrt();
+
+		let resultat_val = 0.618_f64.powf(1.0_f64 / 3.0_f64);
+		let resultat_eps = ((0.618_f64.powf((1.0_f64 / 3.0_f64) - 1.0_f64) * (1.0_f64 / 3.0_f64)).powf(2.0_f64) * 0.001_f64.powf(2.0_f64) + (0.618_f64.powf(1.0_f64 / 3.0_f64) * 0.618_f64.ln()).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64)).sqrt();
+		let resultat_alf = 95.45_f64;
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);		
 	}
 
 	#[test]
@@ -304,22 +350,39 @@ mod tests
 		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).log(1.618_f64.into());
 
 		let resultat_val = 0.618_f64.log(1.618_f64);
-		let resultat_eps = ((1.618_f64.ln()  *  0.618_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)) + ((0.618_f64.ln()  / ( 1.618_f64  * 1.618_f64.ln().powf(2.0_f64))).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64));
+		let resultat_eps = (((1.618_f64.ln()   *  0.618_f64).recip().powf(2.0_f64) * 0.001_f64.powf(2.0_f64)) + ((0.618_f64.ln()  / ( 1.618_f64  * 1.618_f64.ln().powf(2.0_f64))).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64))).sqrt();
+		// variance:             ((base.Val().ln() * self.Val()).recip().powf(2.0_f64) * self.Variance())         + ((self.Val().ln() / (base.Val() * base.Val().ln().powf(2.0_f64))).powf(2.0_f64) * base.Variance()),
 		let resultat_alf = 95.45_f64;
 
 		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
 
 		assert_eq!(resultat, true);
 	}
+
 	#[test]
 	fn test_powi()
 	{
 		todo!()
 	}
+
 	#[test]
 	fn test_powf()
 	{
-		todo!()
+		let resultat : RMesure = RMesure::new(0.618_f64, 0.001_f64 , 95.45_f64).powf(1.618_f64.into());
+
+		let resultat_val = 0.618_f64.powf(1.618_f64);
+		let resultat_eps = ((0.618_f64.powf(1.618_f64 - 1.0_f64)    * 1.618_f64).powf(2.0_f64)   * 0.001_f64.powf(2.0_f64) + (0.618_f64.powf(1.618_f64)    * 0.618_f64.ln()).powf(2.0_f64) * RMESURE_EPS.powf(2.0_f64)).sqrt();
+		// variance:             (self.Val().powf(puiss.Val() - 1.0_f64) * puiss.Val()).powf(2.0_f64) * self.Variance()         + (self.Val().powf(puiss.Val()) * self.Val().ln()).powf(2.0_f64) * puiss.Variance(),
+		let resultat_alf = 95.45_f64;
+
+		println!("resultat : {resultat}");
+		println!("val : {resultat_val}");
+		println!("eps : {resultat_eps}");
+		println!("alf : {resultat_alf}");
+
+		let resultat = resultat.Val() == resultat_val && resultat.Eps() == resultat_eps && resultat.Alpha() == resultat_alf;
+
+		assert_eq!(resultat, true);
 	}
 
 	#[test]
@@ -327,6 +390,7 @@ mod tests
 	{
 		todo!()
 	}
+
 	#[test]
 	fn test_hypot()
 	{
